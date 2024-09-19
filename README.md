@@ -1,2 +1,2 @@
 # MLOPS_Team4
-Sentimental Analysis appliyed in Twitter
+Sentimental Analysis applied in Twitter
