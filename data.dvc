@@ -1,0 +1,14 @@
+md5: 05f9588540facd21b44da18b0962e7f1
+frozen: true
+deps:
+- md5: b58012d9e9bc58138fc682f48e0dcedb.dir
+  size: 238803811
+  nfiles: 1
+  hash: md5
+  path: s3://team4-storage
+outs:
+- md5: ee3c970b47555ceaee8e27d10c079f8e.dir
+  size: 238803811
+  nfiles: 1
+  hash: md5
+  path: data
