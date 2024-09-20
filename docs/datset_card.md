@@ -25,36 +25,23 @@ This dataset card aims to be a base template for new datasets. It has been gener
 <!-- Provide a longer summary of what this dataset is. -->
 
 
+- **Shared by:** Alec Go, Richa Bhayani, Lei Huang
+- **Language(s) (NLP):** Informal English (it contains misspellings and slang)
+- **License:** Open license
 
-- **Curated by:** [More Information Needed]
-- **Funded by [optional]:** [More Information Needed]
-- **Shared by [optional]:** [More Information Needed]
-- **Language(s) (NLP):** [More Information Needed]
-- **License:** [More Information Needed]
-
-### Dataset Sources [optional]
-
-<!-- Provide the basic links for the dataset. -->
-
-- **Repository:** [More Information Needed]
-- **Paper [optional]:** [More Information Needed]
-- **Demo [optional]:** [More Information Needed]
+### Dataset Sources 
+Dataset comes from the paper "Twitter Sentiment Classification using Distant Supervision"
+and training and test datasets can be downloaded from https://twittersentiment.appspot.com/.
 
 ## Uses
 
-<!-- Address questions around how the dataset is intended to be used. -->
-
 ### Direct Use
-
-<!-- This section describes suitable use cases for the dataset. -->
-
-[More Information Needed]
+This dataset is suitable for sentiment analysis and natural language processing
 
 ### Out-of-Scope Use
-
-<!-- This section addresses misuse, malicious use, and uses that the dataset will not work well for. -->
-
-[More Information Needed]
+The dataset is focused on English tweets so conclusions may not be extrapolable for other languages.
+Moreover, tweets are obtained in some domains and on a given date, so this dataset
+can not be used for specific domains or to make a temporal study.
 
 ## Dataset Structure
 
@@ -65,6 +52,15 @@ This dataset card aims to be a base template for new datasets. It has been gener
 ## Dataset Creation
 
 ### Curation Rationale
+Sentimental analysis studies are important for 
+customers as they can review products before
+buying and for marketers, which can be informed about
+the general opinion of their products. Despite that,
+nowadays sentimental analysis is mostly done on reviews,
+without considering other sources like Twitter. In this platform, users can
+reveal their opinions in a more informal way than
+in a review, moreover, it is easy to interact with other
+users to complement their views.
 
 <!-- Motivation for the creation of this dataset. -->
 
