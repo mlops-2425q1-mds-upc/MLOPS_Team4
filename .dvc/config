@@ -2,3 +2,5 @@
     remote = storage
 ['remote "storage"']
     url = /data
+['remote "origin"']
+    url = https://dagshub.com/daniel.cantabella.cantabella/MLOPS_Team4.dvc
