@@ -13,6 +13,7 @@ from nltk.stem import WordNetLemmatizer
 from nltk.corpus import wordnet
 from nltk.tokenize import word_tokenize
 
+# Read raw data
 cols = ["sentiment", "id", "date", "query_string", "user", "text"]
 
 df = pd.read_csv(
@@ -41,9 +42,10 @@ df["hour"] = hour
 df["positive"] = df["sentiment"].replace([0, 4], [0, 1])
 
 ## Process sentences
-# extracted from https://pub.aimind.so/a-comprehensive-guide-to-text-preprocessing-for-twitter-data-getting-ready-for-sentiment-analysis-e7f91cd03671
+# Based on Mahesh Tiwari 2023.
+# https://pub.aimind.so/a-comprehensive-guide-to-text-preprocessing-for-twitter-data-getting-ready-for-sentiment-analysis-e7f91cd03671
 
-# Lowercase
+# Lowercase sentences
 df["text_cleaned"] = df["text"].apply(lambda x: x.lower())
 
 # Removing punctuation
@@ -65,12 +67,13 @@ df["text_cleaned"] = df["text_cleaned"].apply(lambda x: re.sub(r"(\W)\1+", r"\1"
 # Removing special characters
 df["text_cleaned"] = df["text_cleaned"].apply(lambda x: re.sub(r"[^\w\s]", "", x))
 
-# Remove contractions from the 'text_cleaned' column
+# Remove contractions
 df["text_cleaned"] = df["text_cleaned"].apply(lambda x: contractions.fix(x))
 
 logger.info("All sentences have been preprocessed")
 
-# Tokenizer
+
+# Tokenizer. Download pakages if ut us not
 try:
     df["tokens"] = df["text_cleaned"].apply(lambda x: word_tokenize(x))
 except LookupError:
@@ -124,7 +127,7 @@ if params["lemmarize"] == True:
     logger.info("Lemmarizer is appliyed to all sentences")
 
 # Drop unnecessary columns
-df.drop("id", "query_string", "sentiment", "date")
+df.drop(columns=["id", "query_string", "sentiment", "date"])
 
 # save file
 df.to_csv(str(PROCESSED_DATA_DIR) + "/" + "preprocessed_dataset.csv", index=False)
