@@ -1,0 +1,22 @@
+stages:
+  preprocess:
+    cmd: python Sentiment_Analysis/preprocess.py data/raw/training.1600000.processed.noemoticon.csv
+    deps:
+    - Sentiment_Analysis/preprocess.py
+    - data/raw
+    params:
+    - preprocessing.lemmarize
+
+  split:
+    cmd: python Sentiment_Analysis/split.py data/processed/preprocessed_dataset.csv
+    deps:
+    - Sentiment_Analysis/split.py
+    - data/processed
+    params:
+    - split.train_size
+    - split.val_size
+    - split.test_size
+    - split.random_state
+
+
+
