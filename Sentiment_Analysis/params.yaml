@@ -1,0 +1,7 @@
+preprocessing:
+  lemmalization: yes
+
+split:
+  train_size: 0.7
+  test_size: 0.3
+  random_state: 1234
