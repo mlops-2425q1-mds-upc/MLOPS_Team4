@@ -1,9 +1,9 @@
-from config import PROCESSED_DATA_DIR, PARAMS_DIR
+from config import INTERIM_DATA_DIR, PARAMS_DIR
 from sklearn.model_selection import train_test_split
 import pandas as pd
 import yaml
 
-df = pd.read_csv(PROCESSED_DATA_DIR / "preprocessed_dataset.csv")
+df = pd.read_csv(INTERIM_DATA_DIR / "clean_dataset.csv")
 
 with open(PARAMS_DIR, "r") as params_file:
     try:
@@ -31,9 +31,9 @@ X_train, X_val, y_train, y_val = train_test_split(
     random_state=params["random_state"],
 )
 
-X_train.to_csv(str(PROCESSED_DATA_DIR) + "/" + "X_train.csv", index=False)
-y_train.to_csv(str(PROCESSED_DATA_DIR) + "/" + "y_train.csv", index=False)
-X_test.to_csv(str(PROCESSED_DATA_DIR) + "/" + "X_test.csv", index=False)
-y_test.to_csv(str(PROCESSED_DATA_DIR) + "/" + "y_test.csv", index=False)
-X_val.to_csv(str(PROCESSED_DATA_DIR) + "/" + "X_val.csv", index=False)
-y_val.to_csv(str(PROCESSED_DATA_DIR) + "/" + "y_val.csv", index=False)
+X_train.to_csv(str(INTERIM_DATA_DIR) + "/" + "X_train.csv", index=False)
+y_train.to_csv(str(INTERIM_DATA_DIR) + "/" + "y_train.csv", index=False)
+X_test.to_csv(str(INTERIM_DATA_DIR) + "/" + "X_test.csv", index=False)
+y_test.to_csv(str(INTERIM_DATA_DIR) + "/" + "y_test.csv", index=False)
+X_val.to_csv(str(INTERIM_DATA_DIR) + "/" + "X_val.csv", index=False)
+y_val.to_csv(str(INTERIM_DATA_DIR) + "/" + "y_val.csv", index=False)

@@ -16,16 +16,16 @@ stages:
       params.yaml:
         preprocessing.lemmarize: false
   split:
-    cmd: python Sentiment_Analysis/split.py data/processed/preprocessed_dataset.csv
+    cmd: python Sentiment_Analysis/split.py data/interim/clean_dataset.csv
     deps:
     - path: Sentiment_Analysis/split.py
       hash: md5
-      md5: b03275eec6b4f3c7f37754d9dc8f981b
-      size: 1293
-    - path: data/processed
+      md5: f900b6a4681835a6fddbb159232053ca
+      size: 1270
+    - path: data/interim
       hash: md5
-      md5: 23700646c01042de91e6cdc1b7f65a7a.dir
-      size: 1061928525
+      md5: e1f5feffa3f70ecd54a454a28c514311.dir
+      size: 235818379
       nfiles: 7
     params:
       params.yaml:
@@ -33,3 +33,18 @@ stages:
         split.test_size: 0.3
         split.train_size: 0.7
         split.val_size: 0.3
+  clean:
+    cmd: python Sentiment_Analysis/clean.py data/raw/training.1600000.processed.noemoticon.csv
+    deps:
+    - path: Sentiment_Analysis/clean.py
+      hash: md5
+      md5: 307d5cce75447d724e7b37ea62b183a3
+      size: 3523
+    - path: data/raw
+      hash: md5
+      md5: 46fff1b01b5e5d7b71ebe19a9655cc6f.dir
+      size: 238803811
+      nfiles: 1
+    params:
+      params.yaml:
+        clean.lemmarize: true
