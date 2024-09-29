@@ -1,4 +1,4 @@
-from config import RAW_DATA_DIR, PROCESSED_DATA_DIR, PARAMS_DIR
+from config import RAW_DATA_DIR, INTERIM_DATA_DIR, PARAMS_DIR
 
 import pandas as pd
 import re
@@ -63,7 +63,7 @@ df = df.reindex(["positive", "text"], axis=1)
 with open(PARAMS_DIR, "r") as params_file:
     try:
         params = yaml.safe_load(params_file)
-        params = params["preprocessing"]
+        params = params["clean"]
     except yaml.YAMLError as exc:
         print(exc)
 
@@ -112,4 +112,4 @@ if params["lemmarize"] == True:
     logger.info("Lemmarizer is appliyed to all sentences")
 
 # save file
-df.to_csv(str(PROCESSED_DATA_DIR) + "/" + "preprocessed_dataset.csv", index=False)
+df.to_csv(str(INTERIM_DATA_DIR) + "/" + "clean_dataset.csv", index=False)
