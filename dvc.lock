@@ -1,0 +1,35 @@
+schema: '2.0'
+stages:
+  preprocess:
+    cmd: python Sentiment_Analysis/preprocess.py data/raw/training.1600000.processed.noemoticon.csv
+    deps:
+    - path: Sentiment_Analysis/preprocess.py
+      hash: md5
+      md5: 4c5eef5e7ca2739a24c65ac117f1ed23
+      size: 3967
+    - path: data/raw
+      hash: md5
+      md5: 46fff1b01b5e5d7b71ebe19a9655cc6f.dir
+      size: 238803811
+      nfiles: 1
+    params:
+      params.yaml:
+        preprocessing.lemmarize: false
+  split:
+    cmd: python Sentiment_Analysis/split.py data/processed/preprocessed_dataset.csv
+    deps:
+    - path: Sentiment_Analysis/split.py
+      hash: md5
+      md5: b03275eec6b4f3c7f37754d9dc8f981b
+      size: 1293
+    - path: data/processed
+      hash: md5
+      md5: 23700646c01042de91e6cdc1b7f65a7a.dir
+      size: 1061928525
+      nfiles: 7
+    params:
+      params.yaml:
+        split.random_state: 1234
+        split.test_size: 0.3
+        split.train_size: 0.7
+        split.val_size: 0.3
