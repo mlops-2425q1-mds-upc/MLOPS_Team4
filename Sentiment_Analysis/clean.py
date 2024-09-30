@@ -11,15 +11,11 @@ from loguru import logger
 from datetime import datetime
 
 import nltk
-from nltk.stem import WordNetLemmatizer
-from nltk.corpus import wordnet
-from nltk.tokenize import word_tokenize
-
-import nltk
 
 nltk.download("stopwords")
-from nltk.corpus import stopwords
-from nltk.stem import SnowballStemmer
+from nltk.stem import WordNetLemmatizer, SnowballStemmer
+from nltk.corpus import wordnet, stopwords
+from nltk.tokenize import word_tokenize
 
 # %%
 
