@@ -24,9 +24,9 @@ stages:
       size: 1270
     - path: data/interim
       hash: md5
-      md5: e1f5feffa3f70ecd54a454a28c514311.dir
-      size: 235818379
-      nfiles: 7
+      md5: 255ec5f9e6947f0415cca045f772f680.dir
+      size: 304826665
+      nfiles: 8
     params:
       params.yaml:
         split.random_state: 1234
@@ -38,8 +38,8 @@ stages:
     deps:
     - path: Sentiment_Analysis/clean.py
       hash: md5
-      md5: 307d5cce75447d724e7b37ea62b183a3
-      size: 3523
+      md5: b9dfec86f6aec6f3aa12be1f168f5c56
+      size: 3991
     - path: data/raw
       hash: md5
       md5: 46fff1b01b5e5d7b71ebe19a9655cc6f.dir
@@ -47,4 +47,5 @@ stages:
       nfiles: 1
     params:
       params.yaml:
-        clean.lemmarize: true
+        clean.lemmarize: false
+        clean.steam: true

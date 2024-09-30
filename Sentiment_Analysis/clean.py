@@ -1,16 +1,29 @@
+# %%
+
 from config import RAW_DATA_DIR, INTERIM_DATA_DIR, PARAMS_DIR
 
 import pandas as pd
+import contractions
 import re
 import yaml
 from loguru import logger
-import contractions
+
+from datetime import datetime
 
 import nltk
 from nltk.stem import WordNetLemmatizer
 from nltk.corpus import wordnet
 from nltk.tokenize import word_tokenize
 
+import nltk
+
+nltk.download("stopwords")
+from nltk.corpus import stopwords
+from nltk.stem import SnowballStemmer
+
+# %%
+
+# load the dataset
 cols = ["sentiment", "id", "date", "query_string", "user", "text"]
 
 df = pd.read_csv(
@@ -26,38 +39,26 @@ df["positive"] = df["sentiment"].replace([0, 4], [0, 1])
 # Drop unnecessary columns
 df = df.drop(columns=["id", "query_string", "sentiment", "date", "user"], axis=1)
 
-## Clean sentences
-# extracted from https://pub.aimind.so/a-comprehensive-guide-to-text-preprocessing-for-twitter-data-getting-ready-for-sentiment-analysis-e7f91cd03671
+# Cleaning sentences
+# extracted from https://www.kaggle.com/code/arunrk7/nlp-beginner-text-classification-using-lstm
+# from Arun Pandian R
+stop_words = stopwords.words("english")
+stemmer = SnowballStemmer("english")
 
-# Lowercase
-df["text"] = df["text"].apply(lambda x: x.lower())
+text_cleaning_re = r"@\S+|https?:\S+|http?:\S|[^A-Za-z0-9]+"
 
-# Removing punctuation
-import string
 
-df["text"] = df["text"].apply(
-    lambda x: x.translate(str.maketrans("", "", string.punctuation))
-)
+def preprocess(text, stem=False):
+    text = re.sub(text_cleaning_re, " ", str(text).lower()).strip()
+    tokens = []
+    for token in text.split():
+        if token not in stop_words:
+            if stem:
+                tokens.append(stemmer.stem(token))
+            else:
+                tokens.append(token)
+    return " ".join(tokens)
 
-# Removing numbers
-df["text"] = df["text"].apply(lambda x: re.sub(r"\d+", "", x))
-
-# Removing extra spaces
-df["text"] = df["text"].apply(lambda x: " ".join(x.split()))
-
-# Replacing repetitions of punctuation
-df["text"] = df["text"].apply(lambda x: re.sub(r"(\W)\1+", r"\1", x))
-
-# Removing special characters
-df["text"] = df["text"].apply(lambda x: re.sub(r"[^\w\s]", "", x))
-
-# Remove contractions from the "text" column
-df["text"] = df["text"].apply(lambda x: contractions.fix(x))
-
-logger.info("All sentences have been cleaned")
-
-# Put target variable at the 1rst position
-df = df.reindex(["positive", "text"], axis=1)
 
 # Lemmarization, if it is indicated by the user
 with open(PARAMS_DIR, "r") as params_file:
@@ -67,11 +68,30 @@ with open(PARAMS_DIR, "r") as params_file:
     except yaml.YAMLError as exc:
         print(exc)
 
-# Function to perform Lemmatization on a text
+df.text = df.text.apply(lambda x: preprocess(x, stem=params["steam"]))
+
+# extra cleaning
+# extracted from https://pub.aimind.so/a-comprehensive-guide-to-text-preprocessing-for-twitter-data-getting-ready-for-sentiment-analysis-e7f91cd03671
+
+# Removing numbers
+df["text"] = df["text"].apply(lambda x: re.sub(r"\d+", "", x))
+
+# Remove contractions from the "text" column
+df["text"] = df["text"].apply(lambda x: contractions.fix(x))
+
+logger.info("All sentences have been cleaned")
+
+# Put target variable at the 1rst position
+df = df.reindex(["positive", "text"], axis=1)
+
+# Create an instance of WordNetLemmatizer
 lemmatizer = WordNetLemmatizer()
+
+# POS tag mapping dictionary
 wordnet_map = {"N": wordnet.NOUN, "V": wordnet.VERB, "J": wordnet.ADJ, "R": wordnet.ADV}
 
 
+# Function to perform Lemmatization on a text
 def lemmatize_text(text):
     # Get the POS tags for the words
     pos_tags = nltk.pos_tag(text)
@@ -112,4 +132,4 @@ if params["lemmarize"] == True:
     logger.info("Lemmarizer is appliyed to all sentences")
 
 # save file
-df.to_csv(str(INTERIM_DATA_DIR) + "/" + "clean_dataset.csv", index=False)
+df.to_csv(str(INTERIM_DATA_DIR) + "/" + "preprocessed_dataset.csv", index=False)

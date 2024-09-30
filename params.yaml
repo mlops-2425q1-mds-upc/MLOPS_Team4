@@ -1,5 +1,6 @@
 clean:
-  lemmarize: True
+  lemmarize: False
+  steam: True
 
 split:
   train_size: 0.7
