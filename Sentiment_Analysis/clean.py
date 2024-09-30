@@ -132,4 +132,4 @@ if params["lemmarize"] == True:
     logger.info("Lemmarizer is appliyed to all sentences")
 
 # save file
-df.to_csv(str(INTERIM_DATA_DIR) + "/" + "preprocessed_dataset.csv", index=False)
+df.to_csv(str(INTERIM_DATA_DIR) + "/" + "clean_dataset.csv", index=False)
