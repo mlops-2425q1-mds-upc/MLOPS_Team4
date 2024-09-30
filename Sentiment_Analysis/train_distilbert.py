@@ -102,7 +102,7 @@ def train_DistilBert():
         mlflow.log_param("test_dataset_path", test_dataset_path)
 
         # Load model
-        model = DistilBertForSequenceClassification.from_pretrained("distilbert-base-uncased", num_labels=3)
+        model = DistilBertForSequenceClassification.from_pretrained("distilbert-base-uncased", num_labels=2)
 
         # Training arguments
         training_args = TrainingArguments(

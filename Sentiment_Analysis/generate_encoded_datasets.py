@@ -43,15 +43,11 @@ def generate_encoded_datasets():
     test_dataset_path = os.path.join(encoded_dir, 'test_dataset.pt')
     
     
-    df = pd.read_csv(data_dir + '/test_tweets.csv', sep=',')
+    df = pd.read_csv(data_dir + '/clean_dataset.csv', sep=',')
     
     # Prepare input features and labels
-    X = list(df['text'])
-    y = list(df['label'])
-    
-    # Map labels to integers
-    label_to_int = {'pos': 1, 'neu': 0, 'neg': 2}
-    y = list(map(label_to_int.get, y))
+    X = list(df['text'].astype(str))
+    y = list(df['positive'].astype(int))
     
     # Split the dataset into training and test sets
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)

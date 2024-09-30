@@ -20,12 +20,12 @@ stages:
     deps:
     - path: Sentiment_Analysis/split.py
       hash: md5
-      md5: f900b6a4681835a6fddbb159232053ca
-      size: 1270
+      md5: 55ebea0ef5c860c20fd53d62662b9e23
+      size: 1231
     - path: data/interim
       hash: md5
-      md5: 03e1415c072f996a97040ffdb8671275.dir
-      size: 139632331
+      md5: 3ff9f8a79a7996ed8362db3f00a924f0.dir
+      size: 134832324
       nfiles: 7
     params:
       params.yaml:
@@ -38,8 +38,8 @@ stages:
     deps:
     - path: Sentiment_Analysis/clean.py
       hash: md5
-      md5: 835db43724f49e60241492970df15116
-      size: 3923
+      md5: 84540484e9371414c68f231bb4d20780
+      size: 3870
     - path: data/raw
       hash: md5
       md5: 46fff1b01b5e5d7b71ebe19a9655cc6f.dir
@@ -49,3 +49,21 @@ stages:
       params.yaml:
         clean.lemmarize: false
         clean.steam: true
+  encode_data:
+    cmd: python Sentiment_Analysis/generate_encoded_datasets.py
+    deps:
+    - path: Sentiment_Analysis/generate_encoded_datasets.py
+      hash: md5
+      md5: fd415fc9c0af958ffaeecaaf5573eab0
+      size: 2511
+    - path: data/interim
+      hash: md5
+      md5: 3ff9f8a79a7996ed8362db3f00a924f0.dir
+      size: 134832324
+      nfiles: 7
+    params:
+      params.yaml:
+        generate-encoded-datasets.padding: true
+        generate-encoded-datasets.random_state: 0
+        generate-encoded-datasets.test_size: 0.2
+        generate-encoded-datasets.truncation: true

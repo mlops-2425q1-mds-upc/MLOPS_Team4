@@ -1,5 +1,5 @@
 # %%
-
+import os
 from config import RAW_DATA_DIR, INTERIM_DATA_DIR, PARAMS_DIR
 
 import pandas as pd
@@ -13,11 +13,13 @@ from datetime import datetime
 import nltk
 
 nltk.download("stopwords")
+nltk.download('wordnet')
 from nltk.stem import WordNetLemmatizer, SnowballStemmer
 from nltk.corpus import wordnet, stopwords
 from nltk.tokenize import word_tokenize
 
 # %%
+os.makedirs(INTERIM_DATA_DIR, exist_ok=True)
 
 # load the dataset
 cols = ["sentiment", "id", "date", "query_string", "user", "text"]

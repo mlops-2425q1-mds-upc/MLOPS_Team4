@@ -19,7 +19,7 @@ stages:
     - split.test_size
     - split.random_state
 
-encode_data:
+  encode_data:
     cmd: python Sentiment_Analysis/generate_encoded_datasets.py
     deps:
     - data/interim
