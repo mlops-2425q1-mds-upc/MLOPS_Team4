@@ -6,6 +6,7 @@ stages:
     - data/raw
     params:
     - clean.lemmarize
+    - clean.steam
 
   split:
     cmd: python Sentiment_Analysis/split.py data/interim/clean_dataset.csv
