@@ -22,7 +22,6 @@ class TweetDataset(torch.utils.data.Dataset):
     def __len__(self):
         return len(self.labels)
 
-
 def generate_encoded_datasets():
     
     with open(os.path.join(str(PROJ_ROOT), PARAMS_DIR), "r") as params_file:

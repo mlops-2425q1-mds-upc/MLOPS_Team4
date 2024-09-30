@@ -19,5 +19,35 @@ stages:
     - split.test_size
     - split.random_state
 
+encode_data:
+    cmd: python Sentiment_Analysis/generate_encoded_datasets.py
+    deps:
+    - data/interim
+    - Sentiment_Analysis/generate_encoded_datasets.py
+    params:
+    - generate-encoded-datasets.test_size
+    - generate-encoded-datasets.random_state
+    - generate-encoded-datasets.truncation
+    - generate-encoded-datasets.padding
+
+  train_distilbert:
+    cmd: python Sentiment_Analysis/train_distilbert.py
+    deps:
+    - Sentiment_Analysis/train_distilbert.py
+    - data/encoded
+    params:
+    - distilbert-train.model_name
+    - distilbert-train.num_train_epochs
+    - distilbert-train.output_dir
+    - distilbert-train.per_device_train_batch_size
+    - distilbert-train.per_device_eval_batch_size 
+    - distilbert-train.tokenizers_parallelism
+    - distilbert-train.logging_steps
+    - distilbert-train.evaluation_strategy
+    - distilbert-train.save_strategy
+    - distilbert-train.load_best_model_at_end
+    - distilbert-train.metric_for_best_model
+    - distilbert-train.greater_is_better
+    - distilbert-train.save_total_limit
 
 

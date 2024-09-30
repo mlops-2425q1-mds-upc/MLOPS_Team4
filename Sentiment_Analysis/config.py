@@ -24,6 +24,7 @@ REPORTS_DIR = PROJ_ROOT / "reports"
 FIGURES_DIR = REPORTS_DIR / "figures"
 
 MLFLOW_TRACKING_URI = "https://dagshub.com/daniel.cantabella.cantabella/MLOPS_Team4.mlflow" 
+
 # If tqdm is installed, configure loguru with tqdm.write
 # https://github.com/Delgan/loguru/issues/135
 try:
