@@ -24,8 +24,8 @@ stages:
       size: 1231
     - path: data/interim
       hash: md5
-      md5: 3ff9f8a79a7996ed8362db3f00a924f0.dir
-      size: 134832324
+      md5: ab7fa577fa56de280fa824f4093ea423.dir
+      size: 136432325
       nfiles: 7
     params:
       params.yaml:

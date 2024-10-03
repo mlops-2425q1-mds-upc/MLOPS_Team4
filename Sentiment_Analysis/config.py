@@ -11,7 +11,7 @@ PROJ_ROOT = Path(__file__).resolve().parents[1]
 logger.info(f"PROJ_ROOT path is: {PROJ_ROOT}")
 
 DATA_DIR = PROJ_ROOT / "data"
-PARAMS_DIR = Path("params.yaml")
+PARAMS_DIR = PROJ_ROOT / "params.yaml"  # Updated to point to the project root
 
 RAW_DATA_DIR = DATA_DIR / "raw"
 INTERIM_DATA_DIR = DATA_DIR / "interim"

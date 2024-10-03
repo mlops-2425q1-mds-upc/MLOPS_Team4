@@ -25,3 +25,12 @@ tests.ipynb
 
 #Data
 /data
+*.npz
+*.pt
+*.csv
+
+# Ignore virtual environment
+venv/
+
+# Ignore DVC cache
+.dvc/
