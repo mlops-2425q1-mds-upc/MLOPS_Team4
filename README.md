@@ -18,11 +18,7 @@ Sentimental Analysis applied in Twitter
 │
 ├── docs               <- Dataset and model cards
 │
-├── models             <- Scripts to train and preprocess data for models used for │                         experiments in Milestone 1
-│
-├── notebooks          <- Jupyter notebooks. Naming convention is a number (for ordering),
-│                         the creator's initials, and a short `-` delimited description, e.g.
-│                         `1.0-jqp-initial-data-exploration`.
+├── model_experiments   <- Scripts to train and preprocess data for models used for │                         experiments in Milestone 1
 │
 ├── pyproject.toml     <- Project configuration file with package metadata for 
 │                         Sentiment_Analysis and configuration for tools like black
