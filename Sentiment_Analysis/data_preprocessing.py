@@ -1,16 +1,9 @@
 #Implemented by Umut Ekin Gezer
 
-# run with 
-# data_preprocessing.py
-
-# data_preprocessing.py
-
-import os
 import numpy as np
 import pandas as pd
 import pickle
 import yaml
-from sklearn.feature_extraction.text import TfidfVectorizer
 from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 import nltk
@@ -42,18 +35,14 @@ def data_preprocessing():
     with open(PARAMS_DIR, 'r') as file:
         params = yaml.safe_load(file)
         lstm_params = params.get('lstm_train')
-        logreg_params = params.get('logreg_train')
 
     # Check if lstm_params and logreg_params are available
     if lstm_params is None:
         raise KeyError("'lstm_train' key not found in params.yaml")
-    if logreg_params is None:
-        raise KeyError("'logreg_train' key not found in params.yaml")
 
     # Extract parameters
     max_vocab_size = lstm_params['max_vocab_size']
     max_len = lstm_params['max_len']
-    max_features = logreg_params['max_features']
 
     # Construct the path to the 'clean_dataset.csv' in 'data/interim' folder
     df_clean_path = INTERIM_DATA_DIR / 'clean_dataset.csv'
@@ -101,23 +90,6 @@ def data_preprocessing():
         with open(tokenizer_path, 'wb') as handle:
             pickle.dump(tokenizer, handle, protocol=pickle.HIGHEST_PROTOCOL)
         print(f"Tokenizer saved at {tokenizer_path}.")
-
-        # **Logistic Regression Data Preparation**
-        # TF-IDF Vectorization
-        tfidf_vectorizer = TfidfVectorizer(max_features=max_features)
-        X_tfidf = tfidf_vectorizer.fit_transform(X_text)
-
-        # Save X_tfidf and y as .npz files
-        save_path_logreg = PROCESSED_DATA_DIR / 'X_y_data_logreg.npz'
-        with open(save_path_logreg, 'wb') as f:
-            np.savez(f, X=X_tfidf.data, y=y, indices=X_tfidf.indices, indptr=X_tfidf.indptr, shape=X_tfidf.shape)
-        print(f"Logistic Regression data saved successfully at {save_path_logreg}.")
-
-        # Save TF-IDF vectorizer for later use
-        vectorizer_path = PROCESSED_DATA_DIR / 'tfidf_vectorizer.pickle'
-        with open(vectorizer_path, 'wb') as handle:
-            pickle.dump(tfidf_vectorizer, handle, protocol=pickle.HIGHEST_PROTOCOL)
-        print(f"TF-IDF Vectorizer saved at {vectorizer_path}.")
 
     else:
         print(f"File not found: {df_clean_path}")

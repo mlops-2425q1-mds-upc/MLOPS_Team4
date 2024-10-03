@@ -19,7 +19,6 @@ stages:
     outs:
       - data/processed/cleaned_data.csv
       - data/processed/X_y_data_lstm.npz
-      - data/processed/X_y_data_logreg.npz
       - data/processed/tokenizer.pickle
       - data/processed/tfidf_vectorizer.pickle
     params:
