@@ -9,46 +9,33 @@ metrics:
 - recall
 - precision
 - f1
-- roc_auc
 - confusion_matrix
 base_model:
-- nvidia/Llama-3.1-Minitron-4B-Width-Base
+- LSTM
 pipeline_tag: text-classification
-library_name: transformers
+library_name: keras
 tags:
 - sentiment analysis
 - twitter
 - text classification
 ---
-# Model Card for Model ID
+# Model Card for Sentiment Analysis Models
 
 <!-- Provide a quick summary of what the model is/does. -->
 
-This modelcard aims to be a base template for new models. It has been generated using [this raw template](https://github.com/huggingface/huggingface_hub/blob/main/src/huggingface_hub/templates/modelcard_template.md?plain=1).
+This model card documents a Long Short-Term Memory (LSTM) neural network model aimed to predict the sentiment—positive or negative—of tweets based on their text content.
+
 
 ## Model Details
 
 ### Model Description
 
-<!-- Provide a longer summary of what this model is. -->
+The LSTM Neural Network was chosen for its ability to handle sequential data and capture temporal dependencies in text, enhancing context understanding in sentiment analysis.
 
+Model Sources
+* **Repository**: MLOPS_Team4
+* **Parameters**: Detailed in [params.yaml](../params.yaml) under **lstm_train** tag.
 
-
-- **Developed by:** [More Information Needed]
-- **Funded by [optional]:** [More Information Needed]
-- **Shared by [optional]:** [More Information Needed]
-- **Model type:** [More Information Needed]
-- **Language(s) (NLP):** [More Information Needed]
-- **License:** [More Information Needed]
-- **Finetuned from model [optional]:** [More Information Needed]
-
-### Model Sources [optional]
-
-<!-- Provide the basic links for the model. -->
-
-- **Repository:** [More Information Needed]
-- **Paper [optional]:** [More Information Needed]
-- **Demo [optional]:** [More Information Needed]
 
 ## Uses
 
@@ -56,45 +43,66 @@ This modelcard aims to be a base template for new models. It has been generated 
 
 ### Direct Use
 
-<!-- This section is for the model use without fine-tuning or plugging into a larger ecosystem/app. -->
+These models can be directly used for sentiment classification on Twitter data or similar textual datasets. Users can input tweet text to obtain sentiment predictions.
 
-[More Information Needed]
 
-### Downstream Use [optional]
+### Downstream Use 
 
-<!-- This section is for the model use when fine-tuned for a task, or when plugged into a larger ecosystem/app -->
-
-[More Information Needed]
+The model can be integrated into larger systems for social media monitoring, customer feedback analysis, or any application requiring sentiment analysis.
 
 ### Out-of-Scope Use
 
-<!-- This section addresses misuse, malicious use, and uses that the model will not work well for. -->
+This model is not intended for real-time streaming data analysis without further optimization. It may not perform well on languages other than English or highly specialized jargon.
 
-[More Information Needed]
 
 ## Bias, Risks, and Limitations
 
-<!-- This section is meant to convey both technical and sociotechnical limitations. -->
-
-[More Information Needed]
+Since LSTMs process text sequentially, too long or too complex text could lead to diminished performance as the model may lose information over extended sequences.
 
 ### Recommendations
 
 <!-- This section is meant to convey recommendations with respect to the bias, risk, and technical limitations. -->
 
-Users (both direct and downstream) should be made aware of the risks, biases and limitations of the model. More information needed for further recommendations.
+To ensure optimal performance of the LSTM model, it is recommended not to use excessively long texts for inference. 
 
 ## How to Get Started with the Model
 
 Use the code below to get started with the model.
 
-[More Information Needed]
+```python 
+import tensorflow as tf
+from tensorflow.keras.models import load_model
+import pickle
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+
+# Load the trained model
+model = load_model('path_to_lstm_model.keras')
+
+# Load tokenizer
+with open('path_to_tokenizer.pickle', 'rb') as file:
+    tokenizer = pickle.load(file)
+
+# Prepare the text
+text = "Sample tweet text"
+cleaned_text = clean_text(text)
+sequence = tokenizer.texts_to_sequences([cleaned_text])
+padded = pad_sequences(sequence, maxlen=80, padding='post')
+
+# Predict sentiment
+pred_prob = model.predict(padded)
+sentiment = 'Positive' if pred_prob[0][0] > 0.5 else 'Negative'
+
+```
+
+
 
 ## Training Details
 
 ### Training Data
 
-<!-- This should link to a Dataset Card, perhaps with a short stub of information on what the training data is all about as well as documentation related to data pre-processing or additional filtering. -->
+**Dataset**: Sentiment140 Twitter dataset with 1.6 million labeled tweets.
+
+**Preprocessing**: Extensive text cleaning including removal of URLs, mentions, hashtags, numbers, punctuation, lowercasing, tokenization, stopword removal, and stemming.
 
 - See dataset card [here](datset_card.md).
 
@@ -104,110 +112,111 @@ Use the code below to get started with the model.
 
 <!-- This relates heavily to the Technical Specifications. Content here should link to that section when it is relevant to the training procedure. -->
 
-#### Preprocessing [optional]
+#### Preprocessing 
 
-[More Information Needed]
-
+Consistent preprocessing steps were applied to both models to ensure data uniformity and comparability.
 
 #### Training Hyperparameters
 
-- **Training regime:** [More Information Needed] <!--fp32, fp16 mixed precision, bf16 mixed precision, bf16 non-mixed precision, fp16 non-mixed precision, fp8 mixed precision -->
+**LSTM Model**:
+- Max Vocabulary Size: 10,000
+- Max Sequence Length: 80
+- Embedding Dimension: 64
+- LSTM Units: 32
+- Batch Size: 256
+- Number of Epochs: 50
+- Learning Rate: 0.001
+- Optimizer: Adam
+- Loss Function: Binary cross-entropy
 
-#### Speeds, Sizes, Times [optional]
+
+For detailed hyperparameters, refer to [params.yaml](../params.yaml)
+
+
+
+#### Speeds, Sizes, Times 
+ * Training speed: 16.8 min
+ * Model size: 16.7 MB
+
 
 <!-- This section provides information about throughput, start/end time, checkpoint size if relevant, etc. -->
 
-[More Information Needed]
-
 ## Evaluation
 
-<!-- This section describes the evaluation protocols and provides the results. -->
-
-### Testing Data, Factors & Metrics
+### Testing Data & Metrics
 
 #### Testing Data
 
-<!-- This should link to a Dataset Card if possible. -->
+The model was evaluated on a test set comprising 30% of the original dataset to assess their performance on unseen data.
 
-[More Information Needed]
 
-#### Factors
 
-<!-- These are the things the evaluation is disaggregating by, e.g., subpopulations or domains. -->
-
-[More Information Needed]
 
 #### Metrics
 
-<!-- These are the evaluation metrics being used, ideally with a description of why. -->
+The model was evaluated using the following metrics:
 
-[More Information Needed]
+* **Accuracy**: Measures the proportion of correct predictions.
+* **Precision**: Indicates the proportion of positive identifications that were correct.
+* **Recall**: Measures the proportion of actual positives that were correctly identified.
+* **F1 Score**: Harmonic mean of precision and recall.
+* **Confusion Matrix**: Provides a detailed breakdown of true vs. predicted classes.
+
 
 ### Results
 
-[More Information Needed]
+**LSTM Model:**
+
+* **Accuracy**: 77.64%
+* **Precision**: 75.63%
+* **Recall**: 81.68%
+* **F1 Score**: 78.54%
 
 #### Summary
 
+The LSTM model provides results that can assist us in our task of predicting whether a text is positive or negative in a sentiment analysis setting. Additionally, the training times are feasible for our project, and the model size is 16.7 MB, which will facilitate the loading and deployment of the model in production.
 
 
-## Model Examination [optional]
-
-<!-- Relevant interpretability work for the model goes here -->
-
-[More Information Needed]
-
-## Environmental Impact
+## Environmental Impact (TBD in Milestone 3)
 
 <!-- Total emissions (in grams of CO2eq) and additional considerations, such as electricity usage, go here. Edit the suggested text below accordingly -->
 
-Carbon emissions can be estimated using the [Machine Learning Impact calculator](https://mlco2.github.io/impact#compute) presented in [Lacoste et al. (2019)](https://arxiv.org/abs/1910.09700).
+Carbon emissions have been estimated using the [Machine Learning Impact calculator](https://mlco2.github.io/impact#compute) presented in [Lacoste et al. (2019)](https://arxiv.org/abs/1910.09700).
 
-- **Hardware Type:** [More Information Needed]
-- **Hours used:** [More Information Needed]
-- **Cloud Provider:** [More Information Needed]
-- **Compute Region:** [More Information Needed]
-- **Carbon Emitted:** [More Information Needed]
+- **Hardware Type:** TBD
+- **Hours used:** TBD
+- **Cloud Provider:** AWS
+- **Carbon Emitted:** TBD
 
-## Technical Specifications [optional]
+## Technical Specifications
 
 ### Model Architecture and Objective
 
-[More Information Needed]
+LSTM Neural Network consists of a recurrent neural network capable of capturing sequential dependencies in text data for sentiment classification.
 
 ### Compute Infrastructure
 
-[More Information Needed]
+Private Infrastructure
 
-#### Hardware
 
-[More Information Needed]
-
-#### Software
-
-[More Information Needed]
-
-## Citation [optional]
+## Citation
 
 <!-- If there is a paper or blog post introducing the model, the APA and Bibtex information for that should go in this section. -->
 
 **BibTeX:**
 
-[More Information Needed]
+@article{article,
+author = {Hochreiter, Sepp and Schmidhuber, Jürgen},
+year = {1997},
+month = {12},
+pages = {1735-80},
+title = {Long Short-term Memory},
+volume = {9},
+journal = {Neural computation},
+doi = {10.1162/neco.1997.9.8.1735}
+}
 
-**APA:**
 
-[More Information Needed]
-
-## Glossary [optional]
-
-<!-- If relevant, include terms and calculations in this section that can help readers understand the model or model card. -->
-
-[More Information Needed]
-
-## More Information [optional]
-
-[More Information Needed]
 
 ## Model Card Authors 
 

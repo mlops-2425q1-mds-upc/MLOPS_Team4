@@ -7,49 +7,8 @@ stages:
     params:
     - clean.lemmarize
     - clean.steam
-
-  split:
-    cmd: python Sentiment_Analysis/split.py data/interim/clean_dataset.csv
-    deps:
-    - Sentiment_Analysis/split.py
-    - data/interim
-    params:
-    - split.train_size
-    - split.val_size
-    - split.test_size
-    - split.random_state
-
-  encode_data:
-    cmd: python Sentiment_Analysis/generate_encoded_datasets.py
-    deps:
-    - data/interim
-    - Sentiment_Analysis/generate_encoded_datasets.py
-    params:
-    - generate-encoded-datasets.test_size
-    - generate-encoded-datasets.random_state
-    - generate-encoded-datasets.truncation
-    - generate-encoded-datasets.padding
-
-  train_distilbert:
-    cmd: python Sentiment_Analysis/train_distilbert.py
-    deps:
-    - Sentiment_Analysis/train_distilbert.py
-    - data/encoded
-    params:
-    - distilbert-train.model_name
-    - distilbert-train.num_train_epochs
-    - distilbert-train.output_dir
-    - distilbert-train.per_device_train_batch_size
-    - distilbert-train.per_device_eval_batch_size 
-    - distilbert-train.tokenizers_parallelism
-    - distilbert-train.logging_steps
-    - distilbert-train.evaluation_strategy
-    - distilbert-train.save_strategy
-    - distilbert-train.load_best_model_at_end
-    - distilbert-train.metric_for_best_model
-    - distilbert-train.greater_is_better
-    - distilbert-train.save_total_limit
-
+    outs:
+    - data/interim/clean_dataset.csv
 
   data_preprocessing:
     cmd: python Sentiment_Analysis/data_preprocessing.py
@@ -60,7 +19,6 @@ stages:
     outs:
       - data/processed/cleaned_data.csv
       - data/processed/X_y_data_lstm.npz
-      - data/processed/X_y_data_logreg.npz
       - data/processed/tokenizer.pickle
       - data/processed/tfidf_vectorizer.pickle
     params:
@@ -82,20 +40,6 @@ stages:
       - reports/lstm_model/reports
     params:
       - lstm_train
-
-  train_logistic_regression_model:
-    cmd: python Sentiment_Analysis/logistic_regression.py
-    deps:
-      - Sentiment_Analysis/logistic_regression.py
-      - data/processed/X_y_data_logreg.npz
-      - data/processed/tfidf_vectorizer.pickle
-      - params.yaml
-    outs:
-      - reports/logistic_regression_model/models
-      - reports/logistic_regression_model/plots
-      - reports/logistic_regression_model/metrics
-      - reports/logistic_regression_model/reports
-    params:
-      - logreg_train
+      
 
 

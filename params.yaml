@@ -2,37 +2,11 @@ clean:
   lemmarize: False
   steam: True
 
-split:
-  train_size: 0.7
-  val_size: 0.3
-  
-  test_size: 0.3
-  random_state: 1234
-
 generate-encoded-datasets:
   test_size: 0.2
   random_state: 0
   truncation: True
   padding: True
-
-distilbert-train:
-  model_name: &model_name 'distilbert'  
-  output_dir: *model_name
-  num_train_epochs: 2
-  per_device_train_batch_size: 8
-  per_device_eval_batch_size: 16
-  learning_rate: 5e-5
-  tokenizers_parallelism: "false"
-  logging_steps: 10
-  evaluation_strategy: "epoch"
-  save_strategy: "epoch"
-  load_best_model_at_end: True  # Load the best model when finished training (default metric: "loss")
-  metric_for_best_model: "eval_loss"  # Metric to use for the best model
-  greater_is_better: False  # Indicates whether a higher score is better
-  save_total_limit: 3  # Keep only the last 3 checkpoints
-
-preprocessing:
-  # Any preprocessing-specific parameters can go here
 
 lstm_train:
   max_vocab_size: 10000
@@ -46,10 +20,3 @@ lstm_train:
   random_state: 42
   test_size: 0.3
 
-logreg_train:
-  max_features: 5000
-  test_size: 0.3
-  random_state: 42
-  model_name: 'logistic_regression_model'
-  solver: 'saga'
-  max_iter: 1000
