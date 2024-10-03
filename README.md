@@ -10,17 +10,15 @@ Sentimental Analysis applied in Twitter
 
 ```
 ├── LICENSE            <- Open-source license if one is chosen
-├── Makefile           <- Makefile with convenience commands like `make data` or `make train`
 ├── README.md          <- The top-level README for developers using this project.
 ├── data
-│   ├── external       <- Data from third party sources.
 │   ├── interim        <- Intermediate data that has been transformed.
 │   ├── processed      <- The final, canonical data sets for modeling.
 │   └── raw            <- The original, immutable data dump.
 │
-├── docs               <- A default mkdocs project; see www.mkdocs.org for details
+├── docs               <- Dataset and model cards
 │
-├── models             <- Trained and serialized models, model predictions, or model summaries
+├── models             <- Scripts to train and preprocess data for models used for │                         experiments in Milestone 1
 │
 ├── notebooks          <- Jupyter notebooks. Naming convention is a number (for ordering),
 │                         the creator's initials, and a short `-` delimited description, e.g.
@@ -28,33 +26,28 @@ Sentimental Analysis applied in Twitter
 │
 ├── pyproject.toml     <- Project configuration file with package metadata for 
 │                         Sentiment_Analysis and configuration for tools like black
-│
-├── references         <- Data dictionaries, manuals, and all other explanatory materials.
-│
 ├── reports            <- Generated analysis as HTML, PDF, LaTeX, etc.
+│   │
 │   └── figures        <- Generated graphics and figures to be used in reporting
+│   │
+│   └── logistic_regression_model       <- figs from LR
+│   │
+│   └── lstm_model       <- figs from lstm model
 │
-├── requirements.txt   <- The requirements file for reproducing the analysis environment, e.g.
+├── requirements.txt   <- The requirements file for reproducing the analysis environment
 │                         generated with `pip freeze > requirements.txt`
 │
 ├── setup.cfg          <- Configuration file for flake8
 │
 └── Sentiment_Analysis   <- Source code for use in this project.
     │
-    ├── __init__.py             <- Makes Sentiment_Analysis a Python module
+    ├── config.py             <- Store useful variables and configuration
     │
-    ├── config.py               <- Store useful variables and configuration
+    ├── clean.py              <- Pocess raw dataset
     │
-    ├── dataset.py              <- Scripts to download or generate data
+    ├── data_preprocessing    <- Adapt processed dataset to LSTM
     │
-    ├── features.py             <- Code to create features for modeling
-    │
-    ├── modeling                
-    │   ├── __init__.py 
-    │   ├── predict.py          <- Code to run model inference with trained models          
-    │   └── train.py            <- Code to train models
-    │
-    └── plots.py                <- Code to create visualizations
+    └── LSTM_training.py      <- Code to train LSTM
 ```
 
 --------
