@@ -7,6 +7,8 @@ stages:
     params:
     - clean.lemmarize
     - clean.steam
+    outs:
+    - data/interim/clean_dataset.csv
 
   data_preprocessing:
     cmd: python Sentiment_Analysis/data_preprocessing.py

@@ -20,11 +20,11 @@ tags:
 - twitter
 - text classification
 ---
-# Model Card for Model ID
+# Model Card for LSTM
 
 <!-- Provide a quick summary of what the model is/does. -->
 
-This modelcard aims to be a base template for new models. It has been generated using [this raw template](https://github.com/huggingface/huggingface_hub/blob/main/src/huggingface_hub/templates/modelcard_template.md?plain=1).
+This model card has been generated using [this raw template](https://github.com/huggingface/huggingface_hub/blob/main/src/huggingface_hub/templates/modelcard_template.md?plain=1).
 
 ## Model Details
 
@@ -32,23 +32,15 @@ This modelcard aims to be a base template for new models. It has been generated 
 
 <!-- Provide a longer summary of what this model is. -->
 
-
-
-- **Developed by:** [More Information Needed]
-- **Funded by [optional]:** [More Information Needed]
-- **Shared by [optional]:** [More Information Needed]
-- **Model type:** [More Information Needed]
-- **Language(s) (NLP):** [More Information Needed]
-- **License:** [More Information Needed]
-- **Finetuned from model [optional]:** [More Information Needed]
+- **Model type:** LSTM
+- **Language(s) (NLP):** English
+- **License:** Public use
 
 ### Model Sources [optional]
 
 <!-- Provide the basic links for the model. -->
 
-- **Repository:** [More Information Needed]
-- **Paper [optional]:** [More Information Needed]
-- **Demo [optional]:** [More Information Needed]
+- **Repository:** [scikit-learn](https://scikit-learn.org/stable/)
 
 ## Uses
 
