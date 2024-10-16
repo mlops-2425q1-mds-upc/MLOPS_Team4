@@ -13,12 +13,13 @@ from datetime import datetime
 import nltk
 
 nltk.download("stopwords")
-nltk.download('wordnet')
+nltk.download("wordnet")
 from nltk.stem import WordNetLemmatizer, SnowballStemmer
 from nltk.corpus import wordnet, stopwords
 from nltk.tokenize import word_tokenize
 
 # %%
+
 os.makedirs(INTERIM_DATA_DIR, exist_ok=True)
 
 # load the dataset
