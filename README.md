@@ -20,7 +20,7 @@ Sentimental Analysis applied in Twitter
 │
 ├── model_experiments   <- Scripts to train and preprocess data for models used for │                         experiments in Milestone 1
 │
-├── pyproject.toml     <- Project configuration file with package metadata for 
+├── pyproject.toml     <- Project configuration file with package metadata for
 │                         Sentiment_Analysis and configuration for tools like black
 ├── reports            <- Generated analysis as HTML, PDF, LaTeX, etc.
 │   │
@@ -47,4 +47,3 @@ Sentimental Analysis applied in Twitter
 ```
 
 --------
-

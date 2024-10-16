@@ -1,19 +1,19 @@
 # %%
 import os
-from config import RAW_DATA_DIR, INTERIM_DATA_DIR, PARAMS_DIR
-
-import pandas as pd
-import contractions
 import re
-import yaml
-from loguru import logger
-
 from datetime import datetime
 
+import contractions
 import nltk
+import pandas as pd
+import yaml
+from config import INTERIM_DATA_DIR
+from config import PARAMS_DIR
+from config import RAW_DATA_DIR
+from loguru import logger
 
 nltk.download("stopwords")
-nltk.download('wordnet')
+nltk.download("wordnet")
 from nltk.stem import WordNetLemmatizer, SnowballStemmer
 from nltk.corpus import wordnet, stopwords
 from nltk.tokenize import word_tokenize
