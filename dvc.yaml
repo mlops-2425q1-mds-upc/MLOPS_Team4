@@ -20,11 +20,9 @@ stages:
       - data/processed/cleaned_data.csv
       - data/processed/X_y_data_lstm.npz
       - data/processed/tokenizer.pickle
-      - data/processed/tfidf_vectorizer.pickle
     params:
       - lstm_train.max_vocab_size
       - lstm_train.max_len
-      - logreg_train.max_features
 
   train_lstm_model:
     cmd: python Sentiment_Analysis/lstm_training.py

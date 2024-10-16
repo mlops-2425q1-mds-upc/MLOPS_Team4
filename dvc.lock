@@ -42,13 +42,18 @@ stages:
       size: 3870
     - path: data/raw
       hash: md5
-      md5: 46fff1b01b5e5d7b71ebe19a9655cc6f.dir
-      size: 238803811
-      nfiles: 1
+      md5: f7b1f52042d780f7d63cb650580aaab2.dir
+      size: 238809959
+      nfiles: 2
     params:
       params.yaml:
         clean.lemmarize: false
         clean.steam: true
+    outs:
+    - path: data/interim/clean_dataset.csv
+      hash: md5
+      md5: 667928d1b8e743ffb619d25840ec2382
+      size: 67408285
   encode_data:
     cmd: python Sentiment_Analysis/generate_encoded_datasets.py
     deps:
@@ -67,3 +72,35 @@ stages:
         generate-encoded-datasets.random_state: 0
         generate-encoded-datasets.test_size: 0.2
         generate-encoded-datasets.truncation: true
+  data_preprocessing:
+    cmd: python Sentiment_Analysis/data_preprocessing.py
+    deps:
+    - path: Sentiment_Analysis/data_preprocessing.py
+      hash: md5
+      md5: 7fee0dfa2ae3304cffd2662106c7b78f
+      size: 3437
+    - path: data/interim/clean_dataset.csv
+      hash: md5
+      md5: 667928d1b8e743ffb619d25840ec2382
+      size: 67408285
+    - path: params.yaml
+      hash: md5
+      md5: f8ac094482fcccefdef6e7251ceffdf6
+      size: 410
+    params:
+      params.yaml:
+        lstm_train.max_len: 80
+        lstm_train.max_vocab_size: 10000
+    outs:
+    - path: data/processed/X_y_data_lstm.npz
+      hash: md5
+      md5: 12176f49eefc3c9fd00fc830055f68f6
+      size: 522221426
+    - path: data/processed/cleaned_data.csv
+      hash: md5
+      md5: 4740ac34b87c2961fe01f45cc5d5b16e
+      size: 129594436
+    - path: data/processed/tokenizer.pickle
+      hash: md5
+      md5: f85c986e0093b0213e102ad8ab193a93
+      size: 12136649

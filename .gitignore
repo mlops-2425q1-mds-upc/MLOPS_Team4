@@ -24,7 +24,6 @@ venv.bak/
 tests.ipynb
 
 #Data
-/data
 *.npz
 *.pt
 *.csv
