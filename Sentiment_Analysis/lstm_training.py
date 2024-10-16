@@ -1,12 +1,14 @@
 # lstm_training.py
-import os
+# pylint: disable=all
+"""
+LSTM Model Training Script
+This script trains an LSTM model for sentiment analysis using preprocessed data.
+"""
 import pickle
-import re
 
 import dagshub
 import matplotlib.pyplot as plt
 import mlflow.tensorflow
-import nltk
 import numpy as np
 import seaborn as sns
 import tensorflow as tf
@@ -15,8 +17,7 @@ from config import MLFLOW_TRACKING_URI
 from config import PARAMS_DIR
 from config import PROCESSED_DATA_DIR
 from config import REPORTS_DIR
-from nltk.corpus import stopwords
-from nltk.stem import SnowballStemmer
+from data_preprocessing import clean_text
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
@@ -24,41 +25,68 @@ from sklearn.metrics import f1_score
 from sklearn.metrics import precision_score
 from sklearn.metrics import recall_score
 from sklearn.model_selection import train_test_split
-from tensorflow.keras.callbacks import EarlyStopping
-from tensorflow.keras.callbacks import ModelCheckpoint
-from tensorflow.keras.layers import BatchNormalization
-from tensorflow.keras.layers import Dense
-from tensorflow.keras.layers import Dropout
-from tensorflow.keras.layers import Embedding
-from tensorflow.keras.layers import Input
-from tensorflow.keras.layers import LSTM
-from tensorflow.keras.models import Model
-from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.preprocessing.sequence import pad_sequences
+from tensorflow.keras.callbacks import (
+    EarlyStopping,
+)  # pylint: disable=import-error,no-name-in-module
+from tensorflow.keras.callbacks import (
+    ModelCheckpoint,
+)  # pylint: disable=import-error,no-name-in-module
+from tensorflow.keras.layers import (
+    BatchNormalization,
+)  # pylint: disable=import-error,no-name-in-module
+from tensorflow.keras.layers import (
+    Dense,
+)  # pylint: disable=import-error,no-name-in-module
+from tensorflow.keras.layers import (
+    Dropout,
+)  # pylint: disable=import-error,no-name-in-module
+from tensorflow.keras.layers import (
+    Embedding,
+)  # pylint: disable=import-error,no-name-in-module
+from tensorflow.keras.layers import (
+    Input,
+)  # pylint: disable=import-error,no-name-in-module
+from tensorflow.keras.layers import (
+    LSTM,
+)  # pylint: disable=import-error,no-name-in-module
+from tensorflow.keras.models import (
+    Model,
+)  # pylint: disable=import-error,no-name-in-module
+from tensorflow.keras.optimizers import (
+    Adam,
+)  # pylint: disable=import-error,no-name-in-module
+from tensorflow.keras.preprocessing.sequence import (
+    pad_sequences,
+)  # pylint: disable=import-error,no-name-in-module
+
 
 # Import config from the same directory
 
-nltk.download("stopwords")
-
-
-def clean_text(text):
-    # Remove URLs, mentions, hashtags, and numbers
-    text = re.sub(r"http\S+|www\S+|https\S+", "", text, flags=re.MULTILINE)
-    text = re.sub(r"\@\w+|\#", "", text)
-    text = re.sub(r"\d+", "", text)
-    # Remove punctuation and convert to lowercase
-    text = re.sub(r"[^\w\s]", "", text).lower()
-    # Tokenize, remove stopwords, and apply stemming
-    tokens = text.split()
-    stemmer = SnowballStemmer("english")
-    stop_words = set(stopwords.words("english"))
-    tokens = [stemmer.stem(word) for word in tokens if word not in stop_words]
-    return " ".join(tokens)
-
 
 def train_lstm_model():
+    """
+    Train an LSTM model for sentiment analysis using preprocessed data.
+
+    This function reads parameters from a YAML file, sets up MLflow tracking,
+    initializes DagsHub integration, loads the preprocessed data, and builds
+    an LSTM model based on the extracted parameters. The model is trained, and
+    various metrics are calculated and logged using MLflow. The function also
+    saves accuracy and loss plots, as well as the confusion matrix and classification
+    report as artifacts.
+
+    Key Steps:
+    - Load training parameters from a YAML file.
+    - Set up directories for saving models and results.
+    - Train an LSTM model with early stopping and model checkpointing.
+    - Evaluate the model on test data and log metrics and plots using MLflow.
+    - Save the final trained model for future use.
+    - Demonstrate an example prediction using the trained model.
+
+    Raises:
+        KeyError: If 'lstm_train' key is not found in the parameter file.
+    """
     # Load parameters from YAML
-    with open(PARAMS_DIR, "r") as file:
+    with open(PARAMS_DIR, "r", encoding="utf-8") as file:
         params = yaml.safe_load(file)
         lstm_params = params.get("lstm_train")
 
@@ -117,7 +145,7 @@ def train_lstm_model():
         tokenizer_path = PROCESSED_DATA_DIR / "tokenizer.pickle"
 
         loaded_data = np.load(data_path)
-        X = loaded_data["X"]
+        x = loaded_data["X"]
         y = loaded_data["y"]
 
         # Load tokenizer
@@ -131,8 +159,8 @@ def train_lstm_model():
         mlflow.log_param("vocab_size", vocab_size)
 
         # Split the data
-        X_train, X_test, y_train, y_test = train_test_split(
-            X, y, test_size=test_size, random_state=random_state
+        x_train, x_test, y_train, y_test = train_test_split(
+            x, y, test_size=test_size, random_state=random_state
         )
 
         # Build the LSTM model
@@ -171,16 +199,16 @@ def train_lstm_model():
 
         # Train the model
         history = model.fit(
-            X_train,
+            x_train,
             y_train,
             epochs=num_epochs,
             batch_size=batch_size,
-            validation_data=(X_test, y_test),
+            validation_data=(x_test, y_test),
             callbacks=[early_stopping, model_checkpoint],
         )
 
         # Predict on test data
-        y_pred_prob = model.predict(X_test)
+        y_pred_prob = model.predict(x_test)
         y_pred = (y_pred_prob > 0.5).astype("int32")
 
         # Compute metrics
@@ -201,7 +229,7 @@ def train_lstm_model():
 
         # Save metrics to a file
         metrics_path = metrics_dir / "lstm_metrics.txt"
-        with open(metrics_path, "w") as f:
+        with open(metrics_path, "w", encoding="utf-8") as f:
             f.write(f"Accuracy: {accuracy}\n")
             f.write(f"Precision: {precision}\n")
             f.write(f"Recall: {recall}\n")
@@ -262,7 +290,7 @@ def train_lstm_model():
 
         # Save classification report to a text file and log as artifact
         report_path = reports_dir / "lstm_classification_report.txt"
-        with open(report_path, "w") as f:
+        with open(report_path, "w", encoding="utf-8") as f:
             f.write("LSTM Model Classification Report:\n")
             f.write(report)
 
@@ -277,6 +305,20 @@ def train_lstm_model():
 
         # Function to predict sentiment using the trained model
         def predict_sentiment(text):
+            """
+            Predicts the sentiment of the given text using a trained LSTM model.
+
+            This function preprocesses the input text by cleaning and tokenizing it,
+            and then pads the sequence to match the input shape required by the model.
+            It loads the trained LSTM model, makes a prediction, and returns the
+            predicted sentiment as either "Positive" or "Negative."
+
+            Args:
+                text (str): The input text for sentiment prediction.
+
+            Returns:
+                str: The predicted sentiment ("Positive" or "Negative").
+            """
             # Clean the text
             cleaned = clean_text(text)
             # Tokenize and pad
