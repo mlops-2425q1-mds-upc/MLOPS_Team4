@@ -60,9 +60,6 @@ from tensorflow.keras.preprocessing.sequence import (
 )  # pylint: disable=import-error,no-name-in-module
 
 
-# Import config from the same directory
-
-
 def train_lstm_model():
     """
     Train an LSTM model for sentiment analysis using preprocessed data.

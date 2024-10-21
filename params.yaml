@@ -1,12 +1,4 @@
-clean:
-  lemmarize: False
-  steam: True
 
-generate-encoded-datasets:
-  test_size: 0.2
-  random_state: 0
-  truncation: True
-  padding: True
 
 lstm_train:
   max_vocab_size: 10000

@@ -10,7 +10,7 @@ import nltk
 import numpy as np
 import pandas as pd
 import yaml
-from config import INTERIM_DATA_DIR
+from config import RAW_DATA_DIR
 from config import PARAMS_DIR
 from config import PROCESSED_DATA_DIR
 from nltk.corpus import stopwords
@@ -73,12 +73,32 @@ def data_preprocessing():
     max_len = lstm_params["max_len"]
 
     # Construct the path to the 'clean_dataset.csv' in 'data/interim' folder
-    df_clean_path = INTERIM_DATA_DIR / "clean_dataset.csv"
+    df_path = RAW_DATA_DIR / "training.1600000.processed.noemoticon.csv"
 
     # Check if the file exists
-    if df_clean_path.exists():
-        df = pd.read_csv(df_clean_path)
+    if df_path.exists():
+
+        cols = ["sentiment", "id", "date", "query_string", "user", "text"]
+
+        # Read the file
+        df = pd.read_csv(
+            RAW_DATA_DIR / "training.1600000.processed.noemoticon.csv",
+            header=None,
+            names=cols,
+            encoding="latin-1",
+        )
         print("File loaded successfully.")
+
+        # %%
+        ## Feature selection
+
+        # Define target variable: Positive sentences are labelled as 1
+        df["positive"] = df["sentiment"].replace([0, 4], [0, 1])
+
+        # Drop unnecessary columns
+        df = df.drop(
+            columns=["id", "query_string", "sentiment", "date", "user"], axis=1
+        )
 
         # Drop rows with missing values
         df = df.dropna()
@@ -123,7 +143,7 @@ def data_preprocessing():
         print(f"Tokenizer saved at {tokenizer_path}.")
 
     else:
-        print(f"File not found: {df_clean_path}")
+        print(f"File not found: {df_path}")
 
 
 if __name__ == "__main__":
