@@ -15,6 +15,7 @@ from config import PARAMS_DIR
 from config import PROCESSED_DATA_DIR
 from nltk.corpus import stopwords
 from nltk.stem import SnowballStemmer
+from codecarbon import EmissionsTracker
 
 # Attempt to import TensorFlow Keras components; handle import errors
 try:
@@ -63,14 +64,30 @@ def data_preprocessing():
     ) as file:  # Specified encoding explicitly
         params = yaml.safe_load(file)
         lstm_params = params.get("lstm_train")
+        preprocessing_params = params.get("data_preprocessing")
 
     # Check if lstm_params is available
     if lstm_params is None:
         raise KeyError("'lstm_train' key not found in params.yaml")
+    elif preprocessing_params is None:
+        raise KeyError("'data_preprocessing' key not found in params.yaml")
 
     # Extract parameters
+    track_emissions = preprocessing_params["track_emissions"]
     max_vocab_size = lstm_params["max_vocab_size"]
     max_len = lstm_params["max_len"]
+
+    if track_emissions == True:
+        EMISSIONS_TRACKER = EmissionsTracker(
+            project_name="Team4",
+            experiment_name="cleaning",
+            output_file="model.csv",
+            output_dir="./emissions/",
+            save_to_file=True,
+            measure_power_secs=5,
+        )
+        print("CodeCarbon...")
+        EMISSIONS_TRACKER.start()
 
     # Construct the path to the 'clean_dataset.csv' in 'data/interim' folder
     df_path = RAW_DATA_DIR / "training.1600000.processed.noemoticon.csv"

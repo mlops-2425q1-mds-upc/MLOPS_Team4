@@ -1,15 +1,17 @@
 stages:
+  
   data_preprocessing:
     cmd: python Sentiment_Analysis/data_preprocessing.py
     deps:
       - Sentiment_Analysis/data_preprocessing.py
-      - data/interim/clean_dataset.csv
+      - data/raw/training.1600000.processed.noemoticon.csv
       - params.yaml
     outs:
       - data/processed/cleaned_data.csv
       - data/processed/X_y_data_lstm.npz
       - data/processed/tokenizer.pickle
     params:
+      - data_preprocessing.track_emissions
       - lstm_train.max_vocab_size
       - lstm_train.max_len
 

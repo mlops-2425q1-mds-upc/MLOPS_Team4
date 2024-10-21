@@ -1,4 +1,6 @@
 
+data_preprocessing:
+  track_emissions: True
 
 lstm_train:
   max_vocab_size: 10000
