@@ -28,6 +28,9 @@ tests.ipynb
 *.pt
 *.csv
 
+# Models
+*.keras
+
 # Ignore virtual environment
 venv/
 

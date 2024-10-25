@@ -2,8 +2,6 @@
 """
 This module provides functions for preprocessing text data,
 including cleaning and preparing data for LSTM training.
-
-a
 """
 import pickle
 import re
