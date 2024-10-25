@@ -37,3 +37,4 @@ venv/
 
 # Ignore DVC cache
 .dvc/
+/data
