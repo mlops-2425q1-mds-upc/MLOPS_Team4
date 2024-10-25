@@ -30,6 +30,7 @@ tests.ipynb
 
 # Models
 *.keras
+*.pickle
 
 # Ignore virtual environment
 venv/
