@@ -3,6 +3,7 @@ data_preprocessing:
   track_emissions: True
 
 lstm_train:
+  track_emissions: True
   max_vocab_size: 10000
   max_len: 80
   embedding_dim: 64
