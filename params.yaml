@@ -3,7 +3,7 @@
 lstm_train:
   max_vocab_size: 10000
   max_len: 80
-  embedding_dim: 64
+  embedding_dim: 65
   lstm_units: 32
   batch_size: 256
   num_epochs: 50  # Increased to allow early stopping to take effect
