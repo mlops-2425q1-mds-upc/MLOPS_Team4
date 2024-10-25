@@ -13,10 +13,11 @@ import numpy as np
 import seaborn as sns
 import tensorflow as tf
 import yaml
+from codecarbon import EmissionsTracker
 from config import MLFLOW_TRACKING_URI
+from config import MODELS_DIR
 from config import PARAMS_DIR
 from config import PROCESSED_DATA_DIR
-from config import REPORTS_DIR
 from data_preprocessing import clean_text
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import classification_report
@@ -25,37 +26,37 @@ from sklearn.metrics import f1_score
 from sklearn.metrics import precision_score
 from sklearn.metrics import recall_score
 from sklearn.model_selection import train_test_split
-from tensorflow.keras.callbacks import (
+from tensorflow.keras.callbacks import (  # type: ignore
     EarlyStopping,
 )  # pylint: disable=import-error,no-name-in-module
-from tensorflow.keras.callbacks import (
+from tensorflow.keras.callbacks import (  # type: ignore # type: ignore
     ModelCheckpoint,
 )  # pylint: disable=import-error,no-name-in-module
-from tensorflow.keras.layers import (
+from tensorflow.keras.layers import (  # type: ignore
     BatchNormalization,
 )  # pylint: disable=import-error,no-name-in-module
-from tensorflow.keras.layers import (
+from tensorflow.keras.layers import (  # type: ignore
     Dense,
 )  # pylint: disable=import-error,no-name-in-module
-from tensorflow.keras.layers import (
+from tensorflow.keras.layers import (  # type: ignore
     Dropout,
 )  # pylint: disable=import-error,no-name-in-module
-from tensorflow.keras.layers import (
+from tensorflow.keras.layers import (  # type: ignore
     Embedding,
 )  # pylint: disable=import-error,no-name-in-module
-from tensorflow.keras.layers import (
+from tensorflow.keras.layers import (  # type: ignore
     Input,
 )  # pylint: disable=import-error,no-name-in-module
-from tensorflow.keras.layers import (
+from tensorflow.keras.layers import (  # type: ignore
     LSTM,
 )  # pylint: disable=import-error,no-name-in-module
-from tensorflow.keras.models import (
+from tensorflow.keras.models import (  # type: ignore
     Model,
 )  # pylint: disable=import-error,no-name-in-module
-from tensorflow.keras.optimizers import (
+from tensorflow.keras.optimizers import (  # type: ignore
     Adam,
 )  # pylint: disable=import-error,no-name-in-module
-from tensorflow.keras.preprocessing.sequence import (
+from tensorflow.keras.preprocessing.sequence import (  # type: ignore
     pad_sequences,
 )  # pylint: disable=import-error,no-name-in-module
 
@@ -102,39 +103,55 @@ def train_lstm_model():
     random_state = lstm_params["random_state"]
     test_size = lstm_params["test_size"]
 
-    # Set up MLflow tracking
-    mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
-    # Initialize DagsHub
-    dagshub.init(
-        repo_owner="daniel.cantabella.cantabella", repo_name="MLOPS_Team4", mlflow=True
-    )
+    # Start CodeCarbon
+    if lstm_params["track_emissions"] == True:
+        EMISSIONS_TRACKER = EmissionsTracker(
+            project_name="Team4",
+            # experiment_id
+            experiment_name="training",
+            output_file="model.csv",
+            output_dir="./emissions/",
+            save_to_file=True,
+            measure_power_secs=5,
+        )
+        print("CodeCarbon correctly configured...")
+        EMISSIONS_TRACKER.start()
 
-    with mlflow.start_run(run_name=f"{model_name}_LSTM"):
-        # Log parameters
-        mlflow.log_params(
-            {
-                "max_vocab_size": max_vocab_size,
-                "max_len": max_len,
-                "embedding_dim": embedding_dim,
-                "lstm_units": lstm_units,
-                "batch_size": batch_size,
-                "num_epochs": num_epochs,
-                "learning_rate": learning_rate,
-                "model_name": model_name,
-                "random_state": random_state,
-                "test_size": test_size,
-            }
+    # Set up MLflow tracking
+    if lstm_params["upload_experiment"] == True:
+        mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
+        # Initialize DagsHub
+        dagshub.init(
+            repo_owner="daniel.cantabella.cantabella",
+            repo_name="MLOPS_Team4",
+            mlflow=True,
         )
 
+        with mlflow.start_run(run_name=f"{model_name}_LSTM"):
+            # Log parameters
+            mlflow.log_params(
+                {
+                    "max_vocab_size": max_vocab_size,
+                    "max_len": max_len,
+                    "embedding_dim": embedding_dim,
+                    "lstm_units": lstm_units,
+                    "batch_size": batch_size,
+                    "num_epochs": num_epochs,
+                    "learning_rate": learning_rate,
+                    "model_name": model_name,
+                    "random_state": random_state,
+                    "test_size": test_size,
+                }
+            )
+
         # Create directories for saving models and results
-        results_dir = REPORTS_DIR / "lstm_model"
+        results_dir = MODELS_DIR
         results_dir.mkdir(parents=True, exist_ok=True)
         # Subfolders
-        model_dir = results_dir / "models"
         plots_dir = results_dir / "plots"
         metrics_dir = results_dir / "metrics"
         reports_dir = results_dir / "reports"
-        for directory in [model_dir, plots_dir, metrics_dir, reports_dir]:
+        for directory in [plots_dir, metrics_dir, reports_dir]:
             directory.mkdir(parents=True, exist_ok=True)
 
         # Load preprocessed data
@@ -152,13 +169,14 @@ def train_lstm_model():
         vocab_size = len(tokenizer.word_index) + 1
         print(f"LSTM Vocabulary Size: {vocab_size}")
 
-        # Log vocabulary size
-        mlflow.log_param("vocab_size", vocab_size)
-
         # Split the data
         x_train, x_test, y_train, y_test = train_test_split(
             x, y, test_size=test_size, random_state=random_state
         )
+
+        # save the split
+        np.savez(PROCESSED_DATA_DIR / "train.npz", X=x_train, y=y_train)
+        np.savez(PROCESSED_DATA_DIR / "test.npz", X=x_test, y=y_test)
 
         # Build the LSTM model
         inputs = Input(shape=(max_len,))
@@ -189,7 +207,7 @@ def train_lstm_model():
         )
 
         # ModelCheckpoint callback
-        model_checkpoint_path = model_dir / f"{model_name}_LSTM.keras"
+        model_checkpoint_path = MODELS_DIR / f"{model_name}.keras"
         model_checkpoint = ModelCheckpoint(
             model_checkpoint_path, save_best_only=True, monitor="val_loss", mode="min"
         )
@@ -214,26 +232,13 @@ def train_lstm_model():
         recall = recall_score(y_test, y_pred, zero_division=0)
         f1 = f1_score(y_test, y_pred, zero_division=0)
 
-        # Log metrics to MLflow
-        mlflow.log_metrics(
-            {
-                "test_accuracy": accuracy,
-                "test_precision": precision,
-                "test_recall": recall,
-                "test_f1": f1,
-            }
-        )
-
-        # Save metrics to a file
+        # Save metrics to a files
         metrics_path = metrics_dir / "lstm_metrics.txt"
         with open(metrics_path, "w", encoding="utf-8") as f:
             f.write(f"Accuracy: {accuracy}\n")
             f.write(f"Precision: {precision}\n")
             f.write(f"Recall: {recall}\n")
             f.write(f"F1 Score: {f1}\n")
-
-        # Log metrics file as artifact
-        mlflow.log_artifact(str(metrics_path), artifact_path="metrics")
 
         # Classification report
         report = classification_report(y_test, y_pred)
@@ -255,8 +260,6 @@ def train_lstm_model():
         accuracy_plot_path = plots_dir / "lstm_accuracy.png"
         plt.savefig(accuracy_plot_path)
         plt.close()
-
-        mlflow.log_artifact(str(accuracy_plot_path), artifact_path="plots")
 
         plt.figure()
         plt.plot(history.history["loss"], label="Train")
@@ -283,56 +286,37 @@ def train_lstm_model():
         plt.savefig(cm_plot_path)
         plt.close()
 
-        mlflow.log_artifact(str(cm_plot_path), artifact_path="plots")
-
         # Save classification report to a text file and log as artifact
         report_path = reports_dir / "lstm_classification_report.txt"
         with open(report_path, "w", encoding="utf-8") as f:
             f.write("LSTM Model Classification Report:\n")
             f.write(report)
 
-        mlflow.log_artifact(str(report_path), artifact_path="reports")
-
         # Save the final model
-        final_model_path = model_dir / f"{model_name}_LSTM_final.keras"
+        final_model_path = MODELS_DIR / f"{model_name}_final.keras"
         model.save(final_model_path)
 
-        # Log the model to MLflow
-        mlflow.keras.log_model(model, artifact_path="model_LSTM")
+        # Log metrics, artifacts and model to MLflow
+        if lstm_params["upload_experiment"] == True:
+            mlflow.log_param("vocab_size", vocab_size)
+            mlflow.log_metrics(
+                {
+                    "test_accuracy": accuracy,
+                    "test_precision": precision,
+                    "test_recall": recall,
+                    "test_f1": f1,
+                }
+            )
+            mlflow.log_artifact(str(cm_plot_path), artifact_path="plots")
+            mlflow.log_artifact(str(report_path), artifact_path="reports")
+            mlflow.log_artifact(str(metrics_path), artifact_path="metrics")
+            mlflow.log_artifact(str(accuracy_plot_path), artifact_path="plots")
 
-        # Function to predict sentiment using the trained model
-        def predict_sentiment(text):
-            """
-            Predicts the sentiment of the given text using a trained LSTM model.
+            # Log the model to MLflow
+            mlflow.keras.log_model(model, artifact_path="model_LSTM")
 
-            This function preprocesses the input text by cleaning and tokenizing it,
-            and then pads the sequence to match the input shape required by the model.
-            It loads the trained LSTM model, makes a prediction, and returns the
-            predicted sentiment as either "Positive" or "Negative."
-
-            Args:
-                text (str): The input text for sentiment prediction.
-
-            Returns:
-                str: The predicted sentiment ("Positive" or "Negative").
-            """
-            # Clean the text
-            cleaned = clean_text(text)
-            # Tokenize and pad
-            seq = tokenizer.texts_to_sequences([cleaned])
-            padded = pad_sequences(seq, maxlen=max_len, padding="post")
-            # Load model
-            loaded_model = tf.keras.models.load_model(final_model_path)
-            # Predict
-            pred_prob = loaded_model.predict(padded)
-            pred_class = (pred_prob > 0.5).astype("int32")
-            sentiment = "Positive" if pred_class[0][0] == 1 else "Negative"
-            return sentiment
-
-        # Example prediction
-        sample_text = "I absolutely love this product! It works wonders."
-        print(f"Sample Text: {sample_text}")
-        print(f"Predicted Sentiment: {predict_sentiment(sample_text)}")
+        if lstm_params["track_emissions"]:
+            EMISSIONS_TRACKER.stop()
 
 
 if __name__ == "__main__":
