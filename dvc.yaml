@@ -1,5 +1,5 @@
 stages:
-  
+
   data_preprocessing:
     cmd: python Sentiment_Analysis/data_preprocessing.py
     deps:
