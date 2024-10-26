@@ -77,30 +77,31 @@ stages:
     deps:
     - path: Sentiment_Analysis/lstm_training.py
       hash: md5
-      md5: 074cc4175ccaa6dd827bb1407d0117a4
-      size: 12154
+      md5: 5ee4fccfcba5d30e04123a7ccaf03a8c
+      size: 11560
     - path: data/processed/X_y_data_lstm.npz
       hash: md5
       md5: 0243b2ab3ec65a3b9a63ff49d88bf255
       size: 524800490
     - path: data/processed/tokenizer.pickle
       hash: md5
-      md5: 9c69197182bb65e98b0d444a7d6f9cf1
+      md5: a424cc8c46662d26eb6c7a8ca70efbdd
       size: 17179075
     - path: params.yaml
       hash: md5
-      md5: f41d64a1791ca8c94409fe9e2872fb83
-      size: 356
+      md5: 0327f4483d0fc4711f37d87787e7c4c8
+      size: 385
     params:
       params.yaml:
         lstm_train:
-          track_emissions: true
+          track_emissions: false
+          upload_experiment: false
           max_vocab_size: 10000
           max_len: 80
           embedding_dim: 64
           lstm_units: 32
           batch_size: 256
-          num_epochs: 50
+          num_epochs: 1
           learning_rate: 0.001
           model_name: optimized_lstm_model
           random_state: 42
@@ -123,8 +124,8 @@ stages:
       size: 238803811
     - path: params.yaml
       hash: md5
-      md5: eb2488fec2edf1f830c0ac4eb9a082ec
-      size: 358
+      md5: 0327f4483d0fc4711f37d87787e7c4c8
+      size: 385
     params:
       params.yaml:
         lstm_train.max_len: 80
