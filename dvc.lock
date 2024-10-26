@@ -110,3 +110,35 @@ stages:
       hash: md5
       md5: b80d2812014855a9ec267ce782e2481e
       size: 7887023
+  data_preprocessing:
+    cmd: python Sentiment_Analysis/data_preprocessing.py
+    deps:
+    - path: Sentiment_Analysis/data_preprocessing.py
+      hash: md5
+      md5: a4aa5eb145c155e9d7208144c4202068
+      size: 5470
+    - path: data/raw/training.1600000.processed.noemoticon.csv
+      hash: md5
+      md5: df952449d6f9b5f9fdfe3fc53ddef7ca
+      size: 238803811
+    - path: params.yaml
+      hash: md5
+      md5: eb2488fec2edf1f830c0ac4eb9a082ec
+      size: 358
+    params:
+      params.yaml:
+        lstm_train.max_len: 80
+        lstm_train.max_vocab_size: 10000
+    outs:
+    - path: data/processed/X_y_data_lstm.npz
+      hash: md5
+      md5: 0243b2ab3ec65a3b9a63ff49d88bf255
+      size: 524800490
+    - path: data/processed/cleaned_data.csv
+      hash: md5
+      md5: 3523f2a72ed79f9fb382bad01b24bcc9
+      size: 190412729
+    - path: data/processed/tokenizer.pickle
+      hash: md5
+      md5: a424cc8c46662d26eb6c7a8ca70efbdd
+      size: 17179075

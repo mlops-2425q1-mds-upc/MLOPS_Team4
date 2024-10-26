@@ -144,179 +144,179 @@ def train_lstm_model():
                 }
             )
 
-        # Create directories for saving models and results
-        results_dir = MODELS_DIR
-        results_dir.mkdir(parents=True, exist_ok=True)
-        # Subfolders
-        plots_dir = results_dir / "plots"
-        metrics_dir = results_dir / "metrics"
-        reports_dir = results_dir / "reports"
-        for directory in [plots_dir, metrics_dir, reports_dir]:
-            directory.mkdir(parents=True, exist_ok=True)
+    # Create directories for saving models and results
+    results_dir = MODELS_DIR
+    results_dir.mkdir(parents=True, exist_ok=True)
+    # Subfolders
+    plots_dir = results_dir / "plots"
+    metrics_dir = results_dir / "metrics"
+    reports_dir = results_dir / "reports"
+    for directory in [plots_dir, metrics_dir, reports_dir]:
+        directory.mkdir(parents=True, exist_ok=True)
 
-        # Load preprocessed data
-        data_path = PROCESSED_DATA_DIR / "X_y_data_lstm.npz"
-        tokenizer_path = PROCESSED_DATA_DIR / "tokenizer.pickle"
+    # Load preprocessed data
+    data_path = PROCESSED_DATA_DIR / "X_y_data_lstm.npz"
+    tokenizer_path = PROCESSED_DATA_DIR / "tokenizer.pickle"
 
-        loaded_data = np.load(data_path)
-        x = loaded_data["X"]
-        y = loaded_data["y"]
+    loaded_data = np.load(data_path)
+    x = loaded_data["X"]
+    y = loaded_data["y"]
 
-        # Load tokenizer
-        with open(tokenizer_path, "rb") as handle:
-            tokenizer = pickle.load(handle)
+    # Load tokenizer
+    with open(tokenizer_path, "rb") as handle:
+        tokenizer = pickle.load(handle)
 
-        vocab_size = len(tokenizer.word_index) + 1
-        print(f"LSTM Vocabulary Size: {vocab_size}")
+    vocab_size = len(tokenizer.word_index) + 1
+    print(f"LSTM Vocabulary Size: {vocab_size}")
 
-        # Split the data
-        x_train, x_test, y_train, y_test = train_test_split(
-            x, y, test_size=test_size, random_state=random_state
+    # Split the data
+    x_train, x_test, y_train, y_test = train_test_split(
+        x, y, test_size=test_size, random_state=random_state
+    )
+
+    # save the split
+    np.savez(PROCESSED_DATA_DIR / "train.npz", X=x_train, y=y_train)
+    np.savez(PROCESSED_DATA_DIR / "test.npz", X=x_test, y=y_test)
+
+    # Build the LSTM model
+    inputs = Input(shape=(max_len,))
+    embedding_layer = Embedding(
+        input_dim=max_vocab_size, output_dim=embedding_dim, input_length=max_len
+    )(inputs)
+    lstm_layer = LSTM(lstm_units)(embedding_layer)
+    norm_layer = BatchNormalization()(lstm_layer)
+    dense_layer = Dense(32, activation="relu")(norm_layer)
+    dropout_layer = Dropout(0.5)(dense_layer)
+    outputs = Dense(1, activation="sigmoid")(dropout_layer)
+    model = Model(inputs=inputs, outputs=outputs)
+    model.summary()
+
+    # Compile the model
+    optimizer = Adam(learning_rate=learning_rate)
+    model.compile(optimizer=optimizer, loss="binary_crossentropy", metrics=["accuracy"])
+
+    # Adjusted EarlyStopping callback
+    early_stopping = EarlyStopping(
+        monitor="val_loss",
+        min_delta=0.001,
+        patience=3,
+        verbose=1,
+        restore_best_weights=True,
+    )
+
+    # ModelCheckpoint callback
+    model_checkpoint_path = MODELS_DIR / f"{model_name}_final.keras"
+    model_checkpoint = ModelCheckpoint(
+        model_checkpoint_path, save_best_only=True, monitor="val_loss", mode="min"
+    )
+
+    # Train the model
+    history = model.fit(
+        x_train,
+        y_train,
+        epochs=num_epochs,
+        batch_size=batch_size,
+        validation_data=(x_test, y_test),
+        callbacks=[early_stopping, model_checkpoint],
+    )
+
+    # Predict on test data
+    y_pred_prob = model.predict(x_test)
+    y_pred = (y_pred_prob > 0.5).astype("int32")
+
+    # Compute metrics
+    accuracy = accuracy_score(y_test, y_pred)
+    precision = precision_score(y_test, y_pred, zero_division=0)
+    recall = recall_score(y_test, y_pred, zero_division=0)
+    f1 = f1_score(y_test, y_pred, zero_division=0)
+
+    # Save metrics to a files
+    metrics_path = metrics_dir / "lstm_metrics.txt"
+    with open(metrics_path, "w", encoding="utf-8") as f:
+        f.write(f"Accuracy: {accuracy}\n")
+        f.write(f"Precision: {precision}\n")
+        f.write(f"Recall: {recall}\n")
+        f.write(f"F1 Score: {f1}\n")
+
+    # Classification report
+    report = classification_report(y_test, y_pred)
+    print("LSTM Model Classification Report:")
+    print(report)
+
+    # Confusion matrix
+    cm = confusion_matrix(y_test, y_pred)
+
+    # Plot and save accuracy and loss
+    plt.figure()
+    plt.plot(history.history["accuracy"], label="Train")
+    plt.plot(history.history["val_accuracy"], label="Validation")
+    plt.title("LSTM Model Accuracy")
+    plt.ylabel("Accuracy")
+    plt.xlabel("Epoch")
+    plt.legend()
+
+    # Save accuracy plot
+    accuracy_plot_path = plots_dir / "lstm_accuracy.png"
+    plt.savefig(accuracy_plot_path)
+    plt.close()
+
+    plt.figure()
+    plt.plot(history.history["loss"], label="Train")
+    plt.plot(history.history["val_loss"], label="Validation")
+    plt.title("LSTM Model Loss")
+    plt.ylabel("Loss")
+    plt.xlabel("Epoch")
+    plt.legend()
+
+    # Save loss plot
+    loss_plot_path = plots_dir / "lstm_loss.png"
+    plt.savefig(loss_plot_path)
+    plt.close()
+
+    # Confusion matrix plot
+    plt.figure()
+    sns.heatmap(cm, annot=True, fmt="d", cmap="Blues")
+    plt.xlabel("Predicted")
+    plt.ylabel("Actual")
+    plt.title("LSTM Model Confusion Matrix")
+
+    # Save confusion matrix plot
+    cm_plot_path = plots_dir / "lstm_confusion_matrix.png"
+    plt.savefig(cm_plot_path)
+    plt.close()
+
+    # Save classification report to a text file and log as artifact
+    report_path = reports_dir / "lstm_classification_report.txt"
+    with open(report_path, "w", encoding="utf-8") as f:
+        f.write("LSTM Model Classification Report:\n")
+        f.write(report)
+
+    # Save the final model
+    final_model_path = MODELS_DIR / f"{model_name}_final.keras"
+    model.save(final_model_path)
+
+    # Log metrics, artifacts and model to MLflow
+    if lstm_params["upload_experiment"] == True:
+        mlflow.log_param("vocab_size", vocab_size)
+        mlflow.log_metrics(
+            {
+                "test_accuracy": accuracy,
+                "test_precision": precision,
+                "test_recall": recall,
+                "test_f1": f1,
+            }
         )
-
-        # save the split
-        np.savez(PROCESSED_DATA_DIR / "train.npz", X=x_train, y=y_train)
-        np.savez(PROCESSED_DATA_DIR / "test.npz", X=x_test, y=y_test)
-
-        # Build the LSTM model
-        inputs = Input(shape=(max_len,))
-        embedding_layer = Embedding(
-            input_dim=max_vocab_size, output_dim=embedding_dim, input_length=max_len
-        )(inputs)
-        lstm_layer = LSTM(lstm_units)(embedding_layer)
-        norm_layer = BatchNormalization()(lstm_layer)
-        dense_layer = Dense(32, activation="relu")(norm_layer)
-        dropout_layer = Dropout(0.5)(dense_layer)
-        outputs = Dense(1, activation="sigmoid")(dropout_layer)
-        model = Model(inputs=inputs, outputs=outputs)
-        model.summary()
-
-        # Compile the model
-        optimizer = Adam(learning_rate=learning_rate)
-        model.compile(
-            optimizer=optimizer, loss="binary_crossentropy", metrics=["accuracy"]
-        )
-
-        # Adjusted EarlyStopping callback
-        early_stopping = EarlyStopping(
-            monitor="val_loss",
-            min_delta=0.001,
-            patience=3,
-            verbose=1,
-            restore_best_weights=True,
-        )
-
-        # ModelCheckpoint callback
-        model_checkpoint_path = MODELS_DIR / f"{model_name}.keras"
-        model_checkpoint = ModelCheckpoint(
-            model_checkpoint_path, save_best_only=True, monitor="val_loss", mode="min"
-        )
-
-        # Train the model
-        history = model.fit(
-            x_train,
-            y_train,
-            epochs=num_epochs,
-            batch_size=batch_size,
-            validation_data=(x_test, y_test),
-            callbacks=[early_stopping, model_checkpoint],
-        )
-
-        # Predict on test data
-        y_pred_prob = model.predict(x_test)
-        y_pred = (y_pred_prob > 0.5).astype("int32")
-
-        # Compute metrics
-        accuracy = accuracy_score(y_test, y_pred)
-        precision = precision_score(y_test, y_pred, zero_division=0)
-        recall = recall_score(y_test, y_pred, zero_division=0)
-        f1 = f1_score(y_test, y_pred, zero_division=0)
-
-        # Save metrics to a files
-        metrics_path = metrics_dir / "lstm_metrics.txt"
-        with open(metrics_path, "w", encoding="utf-8") as f:
-            f.write(f"Accuracy: {accuracy}\n")
-            f.write(f"Precision: {precision}\n")
-            f.write(f"Recall: {recall}\n")
-            f.write(f"F1 Score: {f1}\n")
-
-        # Classification report
-        report = classification_report(y_test, y_pred)
-        print("LSTM Model Classification Report:")
-        print(report)
-
-        # Confusion matrix
-        cm = confusion_matrix(y_test, y_pred)
-
-        # Plot and save accuracy and loss
-        plt.figure()
-        plt.plot(history.history["accuracy"], label="Train")
-        plt.plot(history.history["val_accuracy"], label="Validation")
-        plt.title("LSTM Model Accuracy")
-        plt.ylabel("Accuracy")
-        plt.xlabel("Epoch")
-        plt.legend()
-        # Save accuracy plot
-        accuracy_plot_path = plots_dir / "lstm_accuracy.png"
-        plt.savefig(accuracy_plot_path)
-        plt.close()
-
-        plt.figure()
-        plt.plot(history.history["loss"], label="Train")
-        plt.plot(history.history["val_loss"], label="Validation")
-        plt.title("LSTM Model Loss")
-        plt.ylabel("Loss")
-        plt.xlabel("Epoch")
-        plt.legend()
-        # Save loss plot
-        loss_plot_path = plots_dir / "lstm_loss.png"
-        plt.savefig(loss_plot_path)
-        plt.close()
-
         mlflow.log_artifact(str(loss_plot_path), artifact_path="plots")
+        mlflow.log_artifact(str(cm_plot_path), artifact_path="plots")
+        mlflow.log_artifact(str(report_path), artifact_path="reports")
+        mlflow.log_artifact(str(metrics_path), artifact_path="metrics")
+        mlflow.log_artifact(str(accuracy_plot_path), artifact_path="plots")
 
-        # Confusion matrix plot
-        plt.figure()
-        sns.heatmap(cm, annot=True, fmt="d", cmap="Blues")
-        plt.xlabel("Predicted")
-        plt.ylabel("Actual")
-        plt.title("LSTM Model Confusion Matrix")
-        # Save confusion matrix plot
-        cm_plot_path = plots_dir / "lstm_confusion_matrix.png"
-        plt.savefig(cm_plot_path)
-        plt.close()
+        # Log the model to MLflow
+        mlflow.keras.log_model(model, artifact_path="model_LSTM")
 
-        # Save classification report to a text file and log as artifact
-        report_path = reports_dir / "lstm_classification_report.txt"
-        with open(report_path, "w", encoding="utf-8") as f:
-            f.write("LSTM Model Classification Report:\n")
-            f.write(report)
-
-        # Save the final model
-        final_model_path = MODELS_DIR / f"{model_name}_final.keras"
-        model.save(final_model_path)
-
-        # Log metrics, artifacts and model to MLflow
-        if lstm_params["upload_experiment"] == True:
-            mlflow.log_param("vocab_size", vocab_size)
-            mlflow.log_metrics(
-                {
-                    "test_accuracy": accuracy,
-                    "test_precision": precision,
-                    "test_recall": recall,
-                    "test_f1": f1,
-                }
-            )
-            mlflow.log_artifact(str(cm_plot_path), artifact_path="plots")
-            mlflow.log_artifact(str(report_path), artifact_path="reports")
-            mlflow.log_artifact(str(metrics_path), artifact_path="metrics")
-            mlflow.log_artifact(str(accuracy_plot_path), artifact_path="plots")
-
-            # Log the model to MLflow
-            mlflow.keras.log_model(model, artifact_path="model_LSTM")
-
-        if lstm_params["track_emissions"]:
-            EMISSIONS_TRACKER.stop()
+    if lstm_params["track_emissions"]:
+        EMISSIONS_TRACKER.stop()
 
 
 if __name__ == "__main__":

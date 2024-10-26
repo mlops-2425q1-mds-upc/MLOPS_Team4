@@ -1,4 +1,17 @@
 stages:
+  data_preprocessing:
+    cmd: python Sentiment_Analysis/data_preprocessing.py
+    deps:
+      - Sentiment_Analysis/data_preprocessing.py
+      - data/raw/training.1600000.processed.noemoticon.csv
+      - params.yaml
+    params:
+      - lstm_train.max_vocab_size
+      - lstm_train.max_len
+    outs:
+      - data/processed/cleaned_data.csv
+      - data/processed/X_y_data_lstm.npz
+      - data/processed/tokenizer.pickle
 
   train_lstm_model:
     cmd: python Sentiment_Analysis/lstm_training.py

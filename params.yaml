@@ -1,15 +1,16 @@
 
 data_preprocessing:
-  track_emissions: True
+  track_emissions: False
 
 lstm_train:
-  track_emissions: True
+  track_emissions: False
+  upload_experiment: False
   max_vocab_size: 10000
   max_len: 80
   embedding_dim: 64
   lstm_units: 32
   batch_size: 256
-  num_epochs: 50  # Increased to allow early stopping to take effect
+  num_epochs: 1  # Increased to allow early stopping to take effect
   learning_rate: 0.001
   model_name: 'optimized_lstm_model'
   random_state: 42
