@@ -24,13 +24,17 @@ venv.bak/
 tests.ipynb
 
 #Data
-/data
 *.npz
 *.pt
 *.csv
+
+# Models
+*.keras
+*.pickle
 
 # Ignore virtual environment
 venv/
 
 # Ignore DVC cache
 .dvc/
+/data

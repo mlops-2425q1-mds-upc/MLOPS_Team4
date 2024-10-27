@@ -22,7 +22,7 @@ This dataset card aims to be a base template for new datasets. It has been gener
 
 
 ## Dataset Details
-This is the sentiment140 dataset. It contains 1,600,000 tweets extracted using the Twitter API. 
+This is the sentiment140 dataset. It contains 1,600,000 tweets extracted using the Twitter API.
 ### Dataset Description
 
 
@@ -68,7 +68,7 @@ target: The sentiment polarity of the tweet (0 = negative, 2 = neutral, 4 = posi
 ids: Unique identifier for the tweet (e.g., 2087).
 date: The timestamp when the tweet was created (e.g., Sat May 16 23:58:44 UTC 2009).
 flag: A query field that shows if a specific query was used to retrieve the tweet (if no query, it will show NO_QUERY).
-user: Username of the person who posted the tweet (e.g., 
+user: Username of the person who posted the tweet (e.g.,
 scotthamilton).
 text: The tweet itself (e.g., “is upset that he can't update his Facebook by texting it... ”).
 Each tweet is independent, with no direct relationship to other tweets. However, users can group tweets by user or query to perform specific analyses, such as user-level sentiment analysis or topic-specific sentiment classification
@@ -93,16 +93,16 @@ Sentimental analysis studies are important for customers as they can review prod
 
 
 <!-- This section describes the data collection and processing process such as data selection criteria, filtering and normalization methods, tools and libraries used, etc. →
-Tweets are from April 6, 2009 to June 25, 2009. 
+Tweets are from April 6, 2009 to June 25, 2009.
 Any tweet containing both positive and negative emoticons is removed. This may happen if a tweet contains two subjects.
 
 
 Emoticons are stripped off.
 
 
-Retweets are removed. Retweeting is the process of copying another user’s tweet and posting it to another account. This usually happens if a user likes another user’s tweet. Retweets are commonly abbreviated with “RT.” Any tweet with RT is removed from the training data to avoid giving a particular tweet extra weight in the training data. 
-4. Tweets with “:P” are removed. At the time of data retrieval, the Twitter API has an issue in which tweets with “:P” are returned for the query “:(”. These tweets are removed because “:P” usually does not imply a negative sentiment. 
-5. Repeated tweets are removed. Occasionally, the Twitter API returns duplicate tweets. The scraper compares a tweet to the last 100 tweets. If it matches any, then it discards the tweet. Similar to retweets, duplicates are removed to avoid putting extra weight on any particular tweet. 
+Retweets are removed. Retweeting is the process of copying another user’s tweet and posting it to another account. This usually happens if a user likes another user’s tweet. Retweets are commonly abbreviated with “RT.” Any tweet with RT is removed from the training data to avoid giving a particular tweet extra weight in the training data.
+4. Tweets with “:P” are removed. At the time of data retrieval, the Twitter API has an issue in which tweets with “:P” are returned for the query “:(”. These tweets are removed because “:P” usually does not imply a negative sentiment.
+5. Repeated tweets are removed. Occasionally, the Twitter API returns duplicate tweets. The scraper compares a tweet to the last 100 tweets. If it matches any, then it discards the tweet. Similar to retweets, duplicates are removed to avoid putting extra weight on any particular tweet.
 
 
 #### Who are the source data producers?
@@ -121,7 +121,7 @@ Source data producers are Twitter platform users who created and posted the twee
 
 
 #### Who are the annotators?
-Annotations of the target are done using a classifier trained on emoticon data against a test set of tweets 
+Annotations of the target are done using a classifier trained on emoticon data against a test set of tweets
 
 
 #### Personal and Sensitive Information

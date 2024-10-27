@@ -1,45 +1,26 @@
 stages:
-  clean:
-    cmd: python Sentiment_Analysis/clean.py data/raw/training.1600000.processed.noemoticon.csv
-    deps:
-    - Sentiment_Analysis/clean.py
-    - data/raw
-    params:
-    - clean.lemmarize
-    - clean.steam
-    outs:
-    - data/interim/clean_dataset.csv
-
   data_preprocessing:
     cmd: python Sentiment_Analysis/data_preprocessing.py
     deps:
       - Sentiment_Analysis/data_preprocessing.py
-      - data/interim/clean_dataset.csv
+      - data/raw/training.1600000.processed.noemoticon.csv
       - params.yaml
+    params:
+      - lstm_train.max_vocab_size
+      - lstm_train.max_len
     outs:
       - data/processed/cleaned_data.csv
       - data/processed/X_y_data_lstm.npz
       - data/processed/tokenizer.pickle
-      - data/processed/tfidf_vectorizer.pickle
-    params:
-      - lstm_train.max_vocab_size
-      - lstm_train.max_len
-      - logreg_train.max_features
 
   train_lstm_model:
     cmd: python Sentiment_Analysis/lstm_training.py
     deps:
-      - Sentiment_Analysis/lstm_training.py
-      - data/processed/X_y_data_lstm.npz
-      - data/processed/tokenizer.pickle
-      - params.yaml
+    - Sentiment_Analysis/lstm_training.py
+    - data/processed/X_y_data_lstm.npz
+    - data/processed/tokenizer.pickle
+    - params.yaml
     outs:
-      - reports/lstm_model/models
-      - reports/lstm_model/plots
-      - reports/lstm_model/metrics
-      - reports/lstm_model/reports
+    - models/optimized_lstm_final.keras
     params:
-      - lstm_train
-      
-
-
+    - lstm_train

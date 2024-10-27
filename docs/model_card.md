@@ -46,7 +46,7 @@ Model Sources
 These models can be directly used for sentiment classification on Twitter data or similar textual datasets. Users can input tweet text to obtain sentiment predictions.
 
 
-### Downstream Use 
+### Downstream Use
 
 The model can be integrated into larger systems for social media monitoring, customer feedback analysis, or any application requiring sentiment analysis.
 
@@ -63,13 +63,13 @@ Since LSTMs process text sequentially, too long or too complex text could lead t
 
 <!-- This section is meant to convey recommendations with respect to the bias, risk, and technical limitations. -->
 
-To ensure optimal performance of the LSTM model, it is recommended not to use excessively long texts for inference. 
+To ensure optimal performance of the LSTM model, it is recommended not to use excessively long texts for inference.
 
 ## How to Get Started with the Model
 
 Use the code below to get started with the model.
 
-```python 
+```python
 import tensorflow as tf
 from tensorflow.keras.models import load_model
 import pickle
@@ -112,7 +112,7 @@ sentiment = 'Positive' if pred_prob[0][0] > 0.5 else 'Negative'
 
 <!-- This relates heavily to the Technical Specifications. Content here should link to that section when it is relevant to the training procedure. -->
 
-#### Preprocessing 
+#### Preprocessing
 
 Consistent preprocessing steps were applied to both models to ensure data uniformity and comparability.
 
@@ -134,7 +134,7 @@ For detailed hyperparameters, refer to [params.yaml](../params.yaml)
 
 
 
-#### Speeds, Sizes, Times 
+#### Speeds, Sizes, Times
  * Training speed: 16.8 min
  * Model size: 16.7 MB
 
@@ -218,7 +218,7 @@ doi = {10.1162/neco.1997.9.8.1735}
 
 
 
-## Model Card Authors 
+## Model Card Authors
 
 
 daniel.cantabella.cantabella@estudiantat.upc.edu,
