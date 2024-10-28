@@ -12,6 +12,6 @@ lstm_train:
   batch_size: 256
   num_epochs: 1  # Increased to allow early stopping to take effect
   learning_rate: 0.001
-  model_name: 'optimized_lstm_model'
+  model_name: 'optimized_lstm'
   random_state: 42
   test_size: 0.3
