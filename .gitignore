@@ -41,3 +41,6 @@ venv/
 
 #Coverage
 .coverage
+
+#Pytest
+.pytest_cache
