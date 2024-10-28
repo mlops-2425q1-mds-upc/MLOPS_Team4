@@ -21,7 +21,7 @@ try:
 except ImportError as e:
     raise ImportError("Ensure TensorFlow is installed and accessible.") from e
 
-from config import PARAMS_DIR, PROCESSED_DATA_DIR, RAW_DATA_DIR
+from .config import PARAMS_DIR, PROCESSED_DATA_DIR, RAW_DATA_DIR
 
 nltk.download("stopwords", quiet=True)  # Download stopwords if not present
 

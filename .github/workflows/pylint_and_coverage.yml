@@ -27,7 +27,7 @@ jobs:
 
     - name: Run tests with coverage
       run: |
-        pytest --cov=Sentiment_Analysis --cov-report=html:coverage_html
+        PYTHONPATH=$PWD pytest --cov=. --cov-report=html:coverage_html -p no:warnings
 
     - name: Upload coverage report as artifact
       uses: actions/upload-artifact@v3
