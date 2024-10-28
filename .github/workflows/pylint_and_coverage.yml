@@ -30,7 +30,7 @@ jobs:
         PYTHONPATH=$PWD pytest --cov=. --cov-report=html:coverage_html -p no:warnings
 
     - name: Upload coverage report as artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: coverage-html-report
         path: coverage_html/
