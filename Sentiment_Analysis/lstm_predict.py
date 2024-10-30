@@ -32,7 +32,7 @@ with open(tokenizer_path, "rb") as handle:
     tokenizer = pickle.load(handle)
 
 
-def predict_sentiment(text):
+def predict_sentiment(text, loaded_model=None):
     """
     Predicts the sentiment of the given text using a trained LSTM model.
 
@@ -54,7 +54,8 @@ def predict_sentiment(text):
     seq = tokenizer.texts_to_sequences([cleaned])
     padded = pad_sequences(seq, maxlen=max_len, padding="post")
     # Load model
-    loaded_model = tf.keras.models.load_model(final_model_path)
+    if loaded_model is None:
+        loaded_model = tf.keras.models.load_model(final_model_path)
     # Predict
     pred_prob = loaded_model.predict(padded)
     pred_class = (pred_prob > 0.5).astype("int32")
