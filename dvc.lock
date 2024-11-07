@@ -72,21 +72,60 @@ stages:
         generate-encoded-datasets.random_state: 0
         generate-encoded-datasets.test_size: 0.2
         generate-encoded-datasets.truncation: true
+  train_lstm_model:
+    cmd: python Sentiment_Analysis/lstm_training.py
+    deps:
+    - path: Sentiment_Analysis/lstm_training.py
+      hash: md5
+      md5: 5ee4fccfcba5d30e04123a7ccaf03a8c
+      size: 11560
+    - path: data/processed/X_y_data_lstm.npz
+      hash: md5
+      md5: 0243b2ab3ec65a3b9a63ff49d88bf255
+      size: 524800490
+    - path: data/processed/tokenizer.pickle
+      hash: md5
+      md5: a424cc8c46662d26eb6c7a8ca70efbdd
+      size: 17179075
+    - path: params.yaml
+      hash: md5
+      md5: 0327f4483d0fc4711f37d87787e7c4c8
+      size: 385
+    params:
+      params.yaml:
+        lstm_train:
+          track_emissions: false
+          upload_experiment: false
+          max_vocab_size: 10000
+          max_len: 80
+          embedding_dim: 64
+          lstm_units: 32
+          batch_size: 256
+          num_epochs: 1
+          learning_rate: 0.001
+          model_name: optimized_lstm_model
+          random_state: 42
+          test_size: 0.3
+    outs:
+    - path: models/optimized_lstm_final.keras
+      hash: md5
+      md5: b80d2812014855a9ec267ce782e2481e
+      size: 7887023
   data_preprocessing:
     cmd: python Sentiment_Analysis/data_preprocessing.py
     deps:
     - path: Sentiment_Analysis/data_preprocessing.py
       hash: md5
-      md5: 1ef84f67258cdde77ce362eb3da55c20
-      size: 4409
-    - path: data/interim/clean_dataset.csv
+      md5: a4aa5eb145c155e9d7208144c4202068
+      size: 5470
+    - path: data/raw/training.1600000.processed.noemoticon.csv
       hash: md5
-      md5: 667928d1b8e743ffb619d25840ec2382
-      size: 67408285
+      md5: df952449d6f9b5f9fdfe3fc53ddef7ca
+      size: 238803811
     - path: params.yaml
       hash: md5
-      md5: 364fb6d831b3820c7d3d0a930ebd9d42
-      size: 409
+      md5: 0327f4483d0fc4711f37d87787e7c4c8
+      size: 385
     params:
       params.yaml:
         lstm_train.max_len: 80
@@ -94,66 +133,13 @@ stages:
     outs:
     - path: data/processed/X_y_data_lstm.npz
       hash: md5
-      md5: 12176f49eefc3c9fd00fc830055f68f6
-      size: 522221426
+      md5: 0243b2ab3ec65a3b9a63ff49d88bf255
+      size: 524800490
     - path: data/processed/cleaned_data.csv
       hash: md5
-      md5: 4740ac34b87c2961fe01f45cc5d5b16e
-      size: 129594436
+      md5: 3523f2a72ed79f9fb382bad01b24bcc9
+      size: 190412729
     - path: data/processed/tokenizer.pickle
       hash: md5
-      md5: 44225b4add314f976216d7963483ca53
-      size: 12136649
-  train_lstm_model:
-    cmd: python Sentiment_Analysis/lstm_training.py
-    deps:
-    - path: Sentiment_Analysis/lstm_training.py
-      hash: md5
-      md5: 38e1373d2ee601e6b9485eeedb3ccce0
-      size: 10549
-    - path: data/processed/X_y_data_lstm.npz
-      hash: md5
-      md5: 12176f49eefc3c9fd00fc830055f68f6
-      size: 522221426
-    - path: data/processed/tokenizer.pickle
-      hash: md5
-      md5: f85c986e0093b0213e102ad8ab193a93
-      size: 12136649
-    - path: params.yaml
-      hash: md5
-      md5: 364fb6d831b3820c7d3d0a930ebd9d42
-      size: 409
-    params:
-      params.yaml:
-        lstm_train:
-          max_vocab_size: 10000
-          max_len: 80
-          embedding_dim: 64
-          lstm_units: 32
-          batch_size: 256
-          num_epochs: 50
-          learning_rate: 0.001
-          model_name: optimized_lstm_model
-          random_state: 42
-          test_size: 0.3
-    outs:
-    - path: reports/lstm_model/metrics
-      hash: md5
-      md5: c993719e6ea4907be8b44a44e092e4b0.dir
-      size: 115
-      nfiles: 1
-    - path: reports/lstm_model/models
-      hash: md5
-      md5: 7964c183c90b63f829adcecd6b54cf89.dir
-      size: 15763992
-      nfiles: 2
-    - path: reports/lstm_model/plots
-      hash: md5
-      md5: 19d02bf9320d23dd6dcaee0e0fcdbc40.dir
-      size: 84630
-      nfiles: 3
-    - path: reports/lstm_model/reports
-      hash: md5
-      md5: 547451a1bddb353583ce9727414876b3.dir
-      size: 360
-      nfiles: 1
+      md5: a424cc8c46662d26eb6c7a8ca70efbdd
+      size: 17179075
