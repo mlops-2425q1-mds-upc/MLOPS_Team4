@@ -29,7 +29,7 @@ app = FastAPI()
 # Global variables
 model = None
 MODEL_INFO = {}
-
+DATASET = {}
 
 class TextInput(BaseModel):
     """
@@ -42,15 +42,28 @@ class TextInput(BaseModel):
 @asynccontextmanager
 async def lifespan(app):
     """
-    Load the model and its info before
+    Load the clean dataset, model and its info before starting
     """
     global model
+    global DATASET
+
+    print("Loading dataset...")
+    data_path = os.path.join(PROCESSED_DATA_DIR, "cleaned_data.csv")
+    if os.path.exists(data_path):
+        df = pd.read_csv(data_path).sample(frac = 0.30, random_state = 123)
+        DATASET["positive"] = df["cleaned_text"][df["positive"] == 1]
+        DATASET["negative"] = df["cleaned_text"][df["positive"] == 0]
+    else:
+        raise FileNotFoundError("Clean data file not found!")
 
     print("Loading model...")
     model_path = os.path.join(MODELS_DIR, "optimized_lstm_final.keras")
     print(f"Model PATH: {model_path}")
-    model = load_model(model_path)
-
+    if os.path.exists(model_path):
+        model = load_model(model_path)
+    else:
+        raise FileNotFoundError("Model file not found!")
+    
     # Load model info during startup
     print("Loading model info...")
     metrics_path = os.path.join(MODELS_DIR, "metrics", "lstm_metrics.txt")
@@ -124,16 +137,14 @@ async def get_random_examples():
     Extract one positive and negative examples from the dataset
     """
     try:
-        df = pd.read_csv(PROCESSED_DATA_DIR / "cleaned_data.csv")
-        positive = df["cleaned_text"][df["positive"] == 1].sample(n=1).iloc[0]
-        negative = df["cleaned_text"][df["positive"] == 0].sample(n=1).iloc[0]
-        return {"positive_example": positive, "negative_example": negative}
+        return {"positive_example": DATASET["positive"].sample(n=1).iloc[0], 
+                "negative_example": DATASET["negative"].sample(n=1).iloc[0]}
     except FileNotFoundError:
         default_positive_examples = [
-            # Add your default positive examples here...
+            "test2"
         ]
         default_negative_examples = [
-            # Add your default negative examples here...
+            "test1"
         ]
         positive = random.choice(default_positive_examples)
         negative = random.choice(default_negative_examples)
