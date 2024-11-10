@@ -9,7 +9,6 @@ from config import MODELS_DIR
 from config import PARAMS_DIR
 from config import PROCESSED_DATA_DIR
 from data_preprocessing import clean_text
-
 from tensorflow.keras.preprocessing.sequence import (  # type: ignore
     pad_sequences,
 )  # pylint: disable=import-error,no-name-in-module
