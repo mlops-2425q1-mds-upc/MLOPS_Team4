@@ -1,4 +1,3 @@
-# lstm_training.py
 """
 LSTM Model Training Script
 This script trains an LSTM model for sentiment analysis using preprocessed data.
@@ -12,41 +11,34 @@ import mlflow.tensorflow
 import numpy as np
 import pandas as pd
 import seaborn as sns
-import tensorflow as tf
 import yaml
 from codecarbon import EmissionsTracker
-from config import (
-    MLFLOW_TRACKING_URI,
-    MODELS_DIR,
-    PARAMS_DIR,
-    PROCESSED_DATA_DIR,
-)
-from data_preprocessing import clean_text
-from sklearn.metrics import (
-    accuracy_score,
-    classification_report,
-    confusion_matrix,
-    f1_score,
-    precision_score,
-    recall_score,
-)
+from config import MLFLOW_TRACKING_URI
+from config import MODELS_DIR
+from config import PARAMS_DIR
+from config import PROCESSED_DATA_DIR
+from deepchecks.tabular import Dataset
+from deepchecks.tabular.suites import model_evaluation
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import classification_report
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import f1_score
+from sklearn.metrics import precision_score
+from sklearn.metrics import recall_score
 from sklearn.model_selection import train_test_split
-from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
-from tensorflow.keras.layers import (
-    BatchNormalization,
-    Dense,
-    Dropout,
-    Embedding,
-    Input,
-    LSTM,
-)
+from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.callbacks import ModelCheckpoint
+from tensorflow.keras.layers import BatchNormalization
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.layers import Dropout
+from tensorflow.keras.layers import Embedding
+from tensorflow.keras.layers import Input
+from tensorflow.keras.layers import LSTM
 from tensorflow.keras.models import Model
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 # Updated Deepchecks imports to avoid deprecation warnings
-from deepchecks.tabular import Dataset
-from deepchecks.tabular.suites import model_evaluation
 
 
 def train_lstm_model():
@@ -76,7 +68,7 @@ def train_lstm_model():
 
     # Start CodeCarbon
     if lstm_params["track_emissions"]:
-        EMISSIONS_TRACKER = EmissionsTracker(
+        emission_tracker = EmissionsTracker(
             project_name="Team4",
             experiment_name="training",
             output_file="model.csv",
@@ -85,7 +77,7 @@ def train_lstm_model():
             measure_power_secs=5,
         )
         print("CodeCarbon correctly configured...")
-        EMISSIONS_TRACKER.start()
+        emission_tracker.start()
 
     # Set up MLflow tracking
     if lstm_params["upload_experiment"]:
@@ -150,9 +142,9 @@ def train_lstm_model():
 
     # Build the LSTM model
     inputs = Input(shape=(max_len,))
-    embedding_layer = Embedding(
-        input_dim=max_vocab_size, output_dim=embedding_dim
-    )(inputs)
+    embedding_layer = Embedding(input_dim=max_vocab_size, output_dim=embedding_dim)(
+        inputs
+    )
     lstm_layer = LSTM(lstm_units)(embedding_layer)
     norm_layer = BatchNormalization()(lstm_layer)
     dense_layer = Dense(32, activation="relu")(norm_layer)
@@ -274,28 +266,35 @@ def train_lstm_model():
             x_train_df,
             label=y_train,
             cat_features=cat_features,
-            dataset_name='Train Dataset'
+            dataset_name="Train Dataset",
         )
         test_dataset = Dataset(
             x_test_df,
             label=y_test,
             cat_features=cat_features,
-            dataset_name='Test Dataset'
+            dataset_name="Test Dataset",
         )
 
         # Set task type after initialization
-        train_dataset.task_type = 'classification'
-        test_dataset.task_type = 'classification'
+        train_dataset.task_type = "classification"
+        test_dataset.task_type = "classification"
 
-        # Create a wrapper for the Keras model
         class KerasClassifierWrapper:
+            """
+            Create a wrapper for the Keras model. It will contain
+            all information about the model
+            """
+
             def __init__(self, model):
+                """
+                Store the model and labels (positive or negative sentiment)
+                """
                 self.model = model
                 self.classes_ = np.array([0, 1])
 
             def predict(self, x):
                 proba = self.model.predict(x)
-                return (proba > 0.5).astype('int32').flatten()
+                return (proba > 0.5).astype("int32").flatten()
 
             def predict_proba(self, x):
                 proba = self.model.predict(x).flatten()
@@ -311,7 +310,7 @@ def train_lstm_model():
         )
 
         # Save the suite result to an HTML file
-        deepchecks_report_path = reports_dir / 'deepchecks_model_evaluation.html'
+        deepchecks_report_path = reports_dir / "deepchecks_model_evaluation.html"
         suite_result.save_as_html(str(deepchecks_report_path))
         print(f"Deepchecks report saved at {deepchecks_report_path}")
 
@@ -341,7 +340,7 @@ def train_lstm_model():
 
     # Stop CodeCarbon tracker if enabled
     if lstm_params["track_emissions"]:
-        EMISSIONS_TRACKER.stop()
+        emission_tracker.stop()
 
 
 if __name__ == "__main__":

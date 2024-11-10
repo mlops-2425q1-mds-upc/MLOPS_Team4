@@ -1,46 +1,66 @@
+"""
+API using FastAPI. It creates three endpoints to interact with the LSTM model.
+It can run in local by doing "fastapi devel path" or in AWS virtual sercer
+"""
 import os
 import random
 from contextlib import asynccontextmanager
+from typing import List
 
+import pandas as pd
 from config import MODELS_DIR
+from config import PROCESSED_DATA_DIR
 from fastapi import FastAPI
 from fastapi import HTTPException
+from fastapi import status
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 from lstm_predict import predict_sentiment
 from pydantic import BaseModel
-from tensorflow import keras
 
+try:
+    from tensorflow.keras.models import load_model  # type: ignore
+except ImportError as e:
+    raise ImportError("Ensure TensorFlow is installed and accessible.") from e
+
+# FastAPI app initialization
 app = FastAPI()
 
+# Global variables
 model = None
-model_info = {}
+MODEL_INFO = {}
 
 
 class TextInput(BaseModel):
-    text: str
+    """
+    Class for post data input. Contains a list of sentences (tweets).
+    """
+
+    tweets: List[str]
 
 
-# Async context manager for the lifespan of the FastAPI app
 @asynccontextmanager
-async def lifespan(app: FastAPI):
-    global model, model_info
-    # Load the model during startup
+async def lifespan(application):
+    """
+    Load the model and its info before
+    """
+    global model
+
     print("Loading model...")
-    model_path = (
-        str(MODELS_DIR) + "/optimized_lstm_final.keras"
-    )  # Replace with actual model name
+    model_path = os.path.join(MODELS_DIR, "optimized_lstm_final.keras")
     print(f"Model PATH: {model_path}")
-    model = keras.models.load_model(model_path)
+    model = load_model(model_path)
 
     # Load model info during startup
     print("Loading model info...")
-    metrics_path = str(MODELS_DIR) + "/metrics/lstm_metrics.txt"
+    metrics_path = os.path.join(MODELS_DIR, "metrics", "lstm_metrics.txt")
     if os.path.exists(metrics_path):
-        with open(metrics_path, "r") as f:
-            model_info["metrics"] = f.read()
+        with open(metrics_path, "r", encoding="utf-8") as f:
+            MODEL_INFO["metrics"] = f.read()
     else:
         raise FileNotFoundError("Metrics file not found!")
 
-    yield  # This is where the FastAPI app will run
+    yield application
 
     # Cleanup during shutdown
     print("Shutting down...")
@@ -49,42 +69,72 @@ async def lifespan(app: FastAPI):
 # Register lifespan function with FastAPI
 app = FastAPI(lifespan=lifespan)
 
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(exc: RequestValidationError):
+    """
+    Return custom error if the format of post in "predict sentiment"
+    is not a list
+    """
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content={"detail": f"Invalid input format: {exc.errors()}"},
+    )
+
+
 # Endpoint 1: Predict sentiment
 @app.post("/predict")
 async def predict_sentiment_api(input_data: TextInput):
-    text = input_data.text
-    if not text:
+    """
+    Predict the sentiment of the input text. This endpoint processes the input
+    text and returns predictions for each tweet in the list.
+
+    Args:
+    - input_data (TextInput): A list of tweets to analyze.
+
+    Returns:
+    - dict: A dictionary where each tweet is mapped to its predicted sentiment.
+    """
+    tweets = input_data.tweets
+    if not tweets:
         raise HTTPException(status_code=400, detail="Text input is required")
-    prediction = predict_sentiment(text, model)
-    return {"input_text": text, "prediction": prediction}
+
+    prediction_dict = {}
+    for tweet in tweets:
+        prediction_dict[tweet] = predict_sentiment(tweet, model)
+
+    return prediction_dict
 
 
 # Endpoint 2: Get model characteristics
 @app.get("/model_info")
 async def get_model_info():
-    if model_info:
-        return {"model_info": model_info}
-    else:
-        raise HTTPException(status_code=404, detail="Model information not available")
+    """
+    Get model information, like accuracy, from the model.info file
+    """
+    if MODEL_INFO:
+        return {"model_info": MODEL_INFO}
+    raise HTTPException(status_code=404, detail="Model information not available")
 
 
 # Endpoint 3: Extract random examples
 @app.get("/random_example")
 async def get_random_examples():
-    positive_examples = [
-        "Example of a positive outcome 1",
-        "Example of a positive outcome 2",
-    ]  # Replace with actual examples
-    negative_examples = [
-        "Example of a negative outcome 1",
-        "Example of a negative outcome 2",
-    ]  # Replace with actual examples
-    if positive_examples and negative_examples:
-        positive = random.choice(positive_examples)
-        negative = random.choice(negative_examples)
+    """
+    Extract one positive and negative examples from the dataset
+    """
+    try:
+        df = pd.read_csv(PROCESSED_DATA_DIR / "cleaned_data.csv")
+        positive = df["cleaned_text"][df["positive"] == 1].sample(n=1).iloc[0]
+        negative = df["cleaned_text"][df["positive"] == 0].sample(n=1).iloc[0]
         return {"positive_example": positive, "negative_example": negative}
-    else:
-        raise HTTPException(status_code=404, detail="Examples not available")
-
-
-# Run the app with: uvicorn app:app --reload
+    except FileNotFoundError:
+        default_positive_examples = [
+            # Add your default positive examples here...
+        ]
+        default_negative_examples = [
+            # Add your default negative examples here...
+        ]
+        positive = random.choice(default_positive_examples)
+        negative = random.choice(default_negative_examples)
+        return {"positive_example": positive, "negative_example": negative}
