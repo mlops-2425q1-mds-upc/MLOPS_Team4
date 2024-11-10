@@ -60,7 +60,7 @@ async def lifespan(app):
     else:
         raise FileNotFoundError("Metrics file not found!")
 
-    yield app
+    yield 
 
     # Cleanup during shutdown
     print("Shutting down...")
