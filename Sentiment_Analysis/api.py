@@ -40,7 +40,7 @@ class TextInput(BaseModel):
 
 
 @asynccontextmanager
-async def lifespan(application):
+async def lifespan(app):
     """
     Load the model and its info before
     """
@@ -60,7 +60,7 @@ async def lifespan(application):
     else:
         raise FileNotFoundError("Metrics file not found!")
 
-    yield application
+    yield app
 
     # Cleanup during shutdown
     print("Shutting down...")
