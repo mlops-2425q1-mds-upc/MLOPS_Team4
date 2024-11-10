@@ -51,8 +51,8 @@ async def lifespan(app):
     data_path = os.path.join(PROCESSED_DATA_DIR, "cleaned_data.csv")
     if os.path.exists(data_path):
         df = pd.read_csv(data_path).sample(frac = 0.30, random_state = 123)
-        DATASET["positive"] = df["cleaned_text"][df["positive"] == 1]
-        DATASET["negative"] = df["cleaned_text"][df["positive"] == 0]
+        DATASET["positive"] = set(df["cleaned_text"][df["positive"] == 1])
+        DATASET["negative"] = set(df["cleaned_text"][df["positive"] == 0])
     else:
         raise FileNotFoundError("Clean data file not found!")
 
@@ -137,8 +137,8 @@ async def get_random_examples():
     Extract one positive and negative examples from the dataset
     """
     try:
-        return {"positive_example": DATASET["positive"].sample(n=1).iloc[0], 
-                "negative_example": DATASET["negative"].sample(n=1).iloc[0]}
+        return {"positive_example": DATASET["positive"].pop(), 
+                "negative_example": DATASET["negative"].pop()}
     except FileNotFoundError:
         default_positive_examples = [
             "test2"
