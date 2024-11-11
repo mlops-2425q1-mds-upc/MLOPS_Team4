@@ -50,7 +50,7 @@ async def lifespan(app):
     print("Loading dataset...")
     data_path = os.path.join(PROCESSED_DATA_DIR, "cleaned_data.csv")
     if os.path.exists(data_path):
-        df = pd.read_csv(data_path).sample(frac = 0.10, random_state = 123)
+        df = pd.read_csv(data_path).sample(frac = 0.01, random_state = 123)
         DATASET["positive"] = set(df["cleaned_text"][df["positive"] == 1])
         DATASET["negative"] = set(df["cleaned_text"][df["positive"] == 0])
     else:
