@@ -1,7 +1,3 @@
-"""
-API using FastAPI. It creates three endpoints to interact with the LSTM model.
-It can run in local by doing "fastapi devel path" or in AWS virtual sercer
-"""
 import os
 import random
 import pickle
@@ -24,13 +20,11 @@ try:
 except ImportError as e:
     raise ImportError("Ensure TensorFlow is installed and accessible.") from e
 
-# FastAPI app initialization
-app = FastAPI()
-
 # Global variables
 model = None
 MODEL_INFO = {}
 DATASET = {}
+
 
 class TextInput(BaseModel):
     """
@@ -65,7 +59,7 @@ async def lifespan(app):
         model = load_model(model_path)
     else:
         raise FileNotFoundError("Model file not found!")
-    
+
     # Load model info during startup
     print("Loading model info...")
     metrics_path = os.path.join(MODELS_DIR, "metrics", "lstm_metrics.txt")
@@ -75,18 +69,18 @@ async def lifespan(app):
     else:
         raise FileNotFoundError("Metrics file not found!")
 
-    yield 
+    yield
 
     # Cleanup during shutdown
     print("Shutting down...")
 
 
-# Register lifespan function with FastAPI
+# Initialize the FastAPI app with the lifespan
 app = FastAPI(lifespan=lifespan)
 
 
 @app.exception_handler(RequestValidationError)
-async def validation_exception_handler(exc: RequestValidationError):
+async def validation_exception_handler(request, exc):
     """
     Return custom error if the format of post in "predict sentiment"
     is not a list
@@ -139,15 +133,17 @@ async def get_random_examples():
     Extract one positive and negative examples from the dataset
     """
     try:
-        return {"positive_example": DATASET["positive"].pop(), 
-                "negative_example": DATASET["negative"].pop()}
-    except FileNotFoundError:
-        default_positive_examples = [
-            "test2"
-        ]
-        default_negative_examples = [
-            "test1"
-        ]
+        if DATASET["positive"] and DATASET["negative"]:
+            return {
+                "positive_example": DATASET["positive"].pop(),
+                "negative_example": DATASET["negative"].pop(),
+            }
+        else:
+            raise KeyError("Empty dataset")
+    except (KeyError, IndexError):
+        print("Dataset not found, returning default examples")
+        default_positive_examples = ["gonna go lay floor new bathroom today pronounc baff bath beef im common"]
+        default_negative_examples = ["instead run spent copious amount time buri code websit epic nerd fail suck"]
         positive = random.choice(default_positive_examples)
         negative = random.choice(default_negative_examples)
-        return {"positive_example": positive, "negative_example": negative}
+        return {"positive_default_example": positive, "negative_default_example": negative}

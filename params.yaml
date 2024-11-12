@@ -3,8 +3,8 @@ data_preprocessing:
 
 lstm_train:
   track_emissions: False
-  upload_experiment: True
-  run_deepchecks: True
+  upload_experiment: False
+  run_deepchecks: False
   max_vocab_size: 10000
   max_len: 80
   embedding_dim: 65
