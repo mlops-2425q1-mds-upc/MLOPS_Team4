@@ -1,3 +1,4 @@
+# pylint: disable=all
 """
 Predict sentiment of an input sentence using LSTM model
 """

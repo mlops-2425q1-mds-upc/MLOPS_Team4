@@ -1,7 +1,8 @@
+from unittest.mock import patch
+
+import api
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import patch
-import api
 
 
 @pytest.fixture
