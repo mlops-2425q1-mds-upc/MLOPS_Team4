@@ -4,6 +4,7 @@ It can run in local by doing "fastapi devel path" or in AWS virtual sercer
 """
 import os
 import random
+import pickle
 from contextlib import asynccontextmanager
 from typing import List
 
@@ -48,13 +49,12 @@ async def lifespan(app):
     global DATASET
 
     print("Loading dataset...")
-    data_path = os.path.join(PROCESSED_DATA_DIR, "cleaned_data.csv")
-    if os.path.exists(data_path):
-        print("working")
-        df = pd.read_csv(data_path).sample(n = 2, random_state = 123)
-        print("yes")
-        DATASET["positive"] = set(df["cleaned_text"][df["positive"] == 1])
-        DATASET["negative"] = set(df["cleaned_text"][df["positive"] == 0])
+    positive_path = os.path.join(PROCESSED_DATA_DIR, "positive_subset_examples.pkl")
+    negative_path = os.path.join(PROCESSED_DATA_DIR, "negative_subset_examples.pkl")
+
+    if os.path.exists(positive_path) and os.path.exists(negative_path):
+        DATASET["positive"] = pickle.load(open(positive_path,'rb'))
+        DATASET["negative"] = pickle.load(open(negative_path,'rb'))
     else:
         raise FileNotFoundError("Clean data file not found!")
 
