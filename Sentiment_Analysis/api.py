@@ -1,7 +1,3 @@
-"""
-API using FastAPI. It creates three endpoints to interact with the LSTM model.
-It can run in local by doing "fastapi devel path" or in AWS virtual sercer
-"""
 import os
 import random
 from contextlib import asynccontextmanager
@@ -23,13 +19,11 @@ try:
 except ImportError as e:
     raise ImportError("Ensure TensorFlow is installed and accessible.") from e
 
-# FastAPI app initialization
-app = FastAPI()
-
 # Global variables
 model = None
 MODEL_INFO = {}
 DATASET = {}
+
 
 class TextInput(BaseModel):
     """
@@ -51,7 +45,7 @@ async def lifespan(app):
     data_path = os.path.join(PROCESSED_DATA_DIR, "cleaned_data.csv")
     if os.path.exists(data_path):
         print("working")
-        df = pd.read_csv(data_path).sample(n = 2, random_state = 123)
+        df = pd.read_csv(data_path).sample(n=2, random_state=123)
         print("yes")
         DATASET["positive"] = set(df["cleaned_text"][df["positive"] == 1])
         DATASET["negative"] = set(df["cleaned_text"][df["positive"] == 0])
@@ -65,7 +59,7 @@ async def lifespan(app):
         model = load_model(model_path)
     else:
         raise FileNotFoundError("Model file not found!")
-    
+
     # Load model info during startup
     print("Loading model info...")
     metrics_path = os.path.join(MODELS_DIR, "metrics", "lstm_metrics.txt")
@@ -75,18 +69,18 @@ async def lifespan(app):
     else:
         raise FileNotFoundError("Metrics file not found!")
 
-    yield 
+    yield
 
     # Cleanup during shutdown
     print("Shutting down...")
 
 
-# Register lifespan function with FastAPI
+# Initialize the FastAPI app with the lifespan
 app = FastAPI(lifespan=lifespan)
 
 
 @app.exception_handler(RequestValidationError)
-async def validation_exception_handler(exc: RequestValidationError):
+async def validation_exception_handler(request, exc):
     """
     Return custom error if the format of post in "predict sentiment"
     is not a list
@@ -139,15 +133,16 @@ async def get_random_examples():
     Extract one positive and negative examples from the dataset
     """
     try:
-        return {"positive_example": DATASET["positive"].pop(), 
-                "negative_example": DATASET["negative"].pop()}
-    except FileNotFoundError:
-        default_positive_examples = [
-            "test2"
-        ]
-        default_negative_examples = [
-            "test1"
-        ]
+        if DATASET["positive"] and DATASET["negative"]:
+            return {
+                "positive_example": DATASET["positive"].pop(),
+                "negative_example": DATASET["negative"].pop(),
+            }
+        else:
+            raise KeyError("Empty dataset")
+    except (KeyError, IndexError):
+        default_positive_examples = ["test2"]
+        default_negative_examples = ["test1"]
         positive = random.choice(default_positive_examples)
         negative = random.choice(default_negative_examples)
         return {"positive_example": positive, "negative_example": negative}
