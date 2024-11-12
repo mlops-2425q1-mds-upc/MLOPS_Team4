@@ -37,7 +37,6 @@ venv/
 
 # Ignore DVC cache
 .dvc/
-/data
 
 #Coverage
 .coverage

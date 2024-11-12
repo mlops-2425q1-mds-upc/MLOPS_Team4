@@ -1,0 +1,5 @@
+outs:
+- md5: b7f7c1b88f298a38130d160bc29ce7a9
+  size: 344371
+  hash: md5
+  path: negative_subset_examples.pkl
