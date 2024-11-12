@@ -119,8 +119,9 @@ def test_random_example_empty_dataset(client):
     Test the /random_example endpoint when the dataset is empty.
     """
     api.DATASET = {"positive": set(), "negative": set()}
-    response = client.get("/random_example")
-    assert response.status_code == 200
-    data = response.json()
-    assert data["positive_example"] == "test2"
-    assert data["negative_example"] == "test1"
+    with patch("api.random.choice", side_effect=["test2", "test1"]):
+        response = client.get("/random_example")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["positive_default_example"] == "test2"
+        assert data["negative_default_example"] == "test1"

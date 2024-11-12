@@ -1,6 +1,6 @@
 import os
-import random
 import pickle
+import random
 from contextlib import asynccontextmanager
 from typing import List
 
@@ -47,8 +47,8 @@ async def lifespan(app):
     negative_path = os.path.join(PROCESSED_DATA_DIR, "negative_subset_examples.pkl")
 
     if os.path.exists(positive_path) and os.path.exists(negative_path):
-        DATASET["positive"] = pickle.load(open(positive_path,'rb'))
-        DATASET["negative"] = pickle.load(open(negative_path,'rb'))
+        DATASET["positive"] = pickle.load(open(positive_path, "rb"))
+        DATASET["negative"] = pickle.load(open(negative_path, "rb"))
     else:
         raise FileNotFoundError("Clean data file not found!")
 
@@ -142,8 +142,15 @@ async def get_random_examples():
             raise KeyError("Empty dataset")
     except (KeyError, IndexError):
         print("Dataset not found, returning default examples")
-        default_positive_examples = ["gonna go lay floor new bathroom today pronounc baff bath beef im common"]
-        default_negative_examples = ["instead run spent copious amount time buri code websit epic nerd fail suck"]
+        default_positive_examples = [
+            "gonna go lay floor new bathroom today pronounc baff bath beef im common"
+        ]
+        default_negative_examples = [
+            "instead run spent copious amount time buri code websit epic nerd fail suck"
+        ]
         positive = random.choice(default_positive_examples)
         negative = random.choice(default_negative_examples)
-        return {"positive_default_example": positive, "negative_default_example": negative}
+        return {
+            "positive_default_example": positive,
+            "negative_default_example": negative,
+        }
