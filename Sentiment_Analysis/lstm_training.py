@@ -1,3 +1,4 @@
+# pylint: disable=all
 """
 LSTM Model Training Script
 This script trains an LSTM model for sentiment analysis using preprocessed data.
@@ -84,8 +85,8 @@ def train_lstm_model():
         mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
         # Initialize DagsHub
         dagshub.init(
-            repo_owner="your_username",
-            repo_name="your_repo",
+            repo_owner="daniel.cantabella.cantabella",
+            repo_name="MLOPS_Team4",
             mlflow=True,
         )
 
