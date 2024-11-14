@@ -1,4 +1,6 @@
 [core]
-    remote = origin
+    remote = myremote
 ['remote "origin"']
+    url = https://dagshub.com/daniel.cantabella.cantabella/MLOPS_Team4.dvc
+['remote "myremote"']
     url = https://dagshub.com/daniel.cantabella.cantabella/MLOPS_Team4.dvc

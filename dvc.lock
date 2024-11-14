@@ -77,8 +77,8 @@ stages:
     deps:
     - path: Sentiment_Analysis/lstm_training.py
       hash: md5
-      md5: 5ee4fccfcba5d30e04123a7ccaf03a8c
-      size: 11560
+      md5: dd22afd912727a3bb41d7c7b146b5ce7
+      size: 12305
     - path: data/processed/X_y_data_lstm.npz
       hash: md5
       md5: 0243b2ab3ec65a3b9a63ff49d88bf255
@@ -89,21 +89,22 @@ stages:
       size: 17179075
     - path: params.yaml
       hash: md5
-      md5: 0327f4483d0fc4711f37d87787e7c4c8
-      size: 385
+      md5: 21122fd3a3d924c6c8ad084253043f64
+      size: 351
     params:
       params.yaml:
         lstm_train:
           track_emissions: false
           upload_experiment: false
+          run_deepchecks: false
           max_vocab_size: 10000
           max_len: 80
-          embedding_dim: 64
+          embedding_dim: 65
           lstm_units: 32
           batch_size: 256
-          num_epochs: 1
+          num_epochs: 10
           learning_rate: 0.001
-          model_name: optimized_lstm_model
+          model_name: optimized_lstm
           random_state: 42
           test_size: 0.3
     outs:
@@ -116,16 +117,16 @@ stages:
     deps:
     - path: Sentiment_Analysis/data_preprocessing.py
       hash: md5
-      md5: a4aa5eb145c155e9d7208144c4202068
-      size: 5470
+      md5: 1d32812a278ce1ca37c50342c5110ad2
+      size: 5440
     - path: data/raw/training.1600000.processed.noemoticon.csv
       hash: md5
       md5: df952449d6f9b5f9fdfe3fc53ddef7ca
       size: 238803811
     - path: params.yaml
       hash: md5
-      md5: 0327f4483d0fc4711f37d87787e7c4c8
-      size: 385
+      md5: 21122fd3a3d924c6c8ad084253043f64
+      size: 351
     params:
       params.yaml:
         lstm_train.max_len: 80

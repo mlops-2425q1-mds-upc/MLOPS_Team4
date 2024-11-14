@@ -4,7 +4,6 @@ including cleaning and preparing data for LSTM training.
 """
 import pickle
 import re
-from pathlib import Path
 
 import nltk
 import numpy as np
@@ -21,7 +20,10 @@ try:
 except ImportError as e:
     raise ImportError("Ensure TensorFlow is installed and accessible.") from e
 
-from config import PARAMS_DIR, PROCESSED_DATA_DIR, RAW_DATA_DIR
+try:
+    from .config import PARAMS_DIR, PROCESSED_DATA_DIR, RAW_DATA_DIR
+except ImportError:
+    from config import PARAMS_DIR, PROCESSED_DATA_DIR, RAW_DATA_DIR
 
 nltk.download("stopwords", quiet=True)  # Download stopwords if not present
 
@@ -97,12 +99,8 @@ def data_preprocessing() -> None:
     cols = ["sentiment", "id", "date", "query_string", "user", "text"]
 
     # Read the file
-    try:
-        df = pd.read_csv(df_path, header=None, names=cols, encoding="latin-1")
-        print("File loaded successfully.")
-    except Exception as e:
-        print(f"Error loading file: {e}")
-        return
+    df = pd.read_csv(df_path, header=None, names=cols, encoding="latin-1")
+    print("File loaded successfully.")
 
     # Feature selection
     df["positive"] = df["sentiment"].replace([0, 4], [0, 1])

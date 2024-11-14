@@ -37,4 +37,13 @@ venv/
 
 # Ignore DVC cache
 .dvc/
-/data
+
+#Coverage
+.coverage
+
+#Pytest
+.pytest_cache
+
+#Artifacts
+coverage
+coverage_html

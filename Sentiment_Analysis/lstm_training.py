@@ -1,8 +1,8 @@
-# lstm_training.py
 # pylint: disable=all
 """
 LSTM Model Training Script
 This script trains an LSTM model for sentiment analysis using preprocessed data.
+It also includes model testing steps using Deepchecks.
 """
 import pickle
 
@@ -10,15 +10,16 @@ import dagshub
 import matplotlib.pyplot as plt
 import mlflow.tensorflow
 import numpy as np
+import pandas as pd
 import seaborn as sns
-import tensorflow as tf
 import yaml
 from codecarbon import EmissionsTracker
 from config import MLFLOW_TRACKING_URI
 from config import MODELS_DIR
 from config import PARAMS_DIR
 from config import PROCESSED_DATA_DIR
-from data_preprocessing import clean_text
+from deepchecks.tabular import Dataset
+from deepchecks.tabular.suites import model_evaluation
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
@@ -26,62 +27,24 @@ from sklearn.metrics import f1_score
 from sklearn.metrics import precision_score
 from sklearn.metrics import recall_score
 from sklearn.model_selection import train_test_split
-from tensorflow.keras.callbacks import (  # type: ignore
-    EarlyStopping,
-)  # pylint: disable=import-error,no-name-in-module
-from tensorflow.keras.callbacks import (  # type: ignore # type: ignore
-    ModelCheckpoint,
-)  # pylint: disable=import-error,no-name-in-module
-from tensorflow.keras.layers import (  # type: ignore
-    BatchNormalization,
-)  # pylint: disable=import-error,no-name-in-module
-from tensorflow.keras.layers import (  # type: ignore
-    Dense,
-)  # pylint: disable=import-error,no-name-in-module
-from tensorflow.keras.layers import (  # type: ignore
-    Dropout,
-)  # pylint: disable=import-error,no-name-in-module
-from tensorflow.keras.layers import (  # type: ignore
-    Embedding,
-)  # pylint: disable=import-error,no-name-in-module
-from tensorflow.keras.layers import (  # type: ignore
-    Input,
-)  # pylint: disable=import-error,no-name-in-module
-from tensorflow.keras.layers import (  # type: ignore
-    LSTM,
-)  # pylint: disable=import-error,no-name-in-module
-from tensorflow.keras.models import (  # type: ignore
-    Model,
-)  # pylint: disable=import-error,no-name-in-module
-from tensorflow.keras.optimizers import (  # type: ignore
-    Adam,
-)  # pylint: disable=import-error,no-name-in-module
-from tensorflow.keras.preprocessing.sequence import (  # type: ignore
-    pad_sequences,
-)  # pylint: disable=import-error,no-name-in-module
+from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.callbacks import ModelCheckpoint
+from tensorflow.keras.layers import BatchNormalization
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.layers import Dropout
+from tensorflow.keras.layers import Embedding
+from tensorflow.keras.layers import Input
+from tensorflow.keras.layers import LSTM
+from tensorflow.keras.models import Model
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+
+# Updated Deepchecks imports to avoid deprecation warnings
 
 
 def train_lstm_model():
     """
     Train an LSTM model for sentiment analysis using preprocessed data.
-
-    This function reads parameters from a YAML file, sets up MLflow tracking,
-    initializes DagsHub integration, loads the preprocessed data, and builds
-    an LSTM model based on the extracted parameters. The model is trained, and
-    various metrics are calculated and logged using MLflow. The function also
-    saves accuracy and loss plots, as well as the confusion matrix and classification
-    report as artifacts.
-
-    Key Steps:
-    - Load training parameters from a YAML file.
-    - Set up directories for saving models and results.
-    - Train an LSTM model with early stopping and model checkpointing.
-    - Evaluate the model on test data and log metrics and plots using MLflow.
-    - Save the final trained model for future use.
-    - Demonstrate an example prediction using the trained model.
-
-    Raises:
-        KeyError: If 'lstm_train' key is not found in the parameter file.
     """
     # Load parameters from YAML
     with open(PARAMS_DIR, "r", encoding="utf-8") as file:
@@ -102,12 +65,12 @@ def train_lstm_model():
     model_name = lstm_params["model_name"]
     random_state = lstm_params["random_state"]
     test_size = lstm_params["test_size"]
+    run_deepchecks = lstm_params.get("run_deepchecks", False)
 
     # Start CodeCarbon
-    if lstm_params["track_emissions"] == True:
-        EMISSIONS_TRACKER = EmissionsTracker(
+    if lstm_params["track_emissions"]:
+        emission_tracker = EmissionsTracker(
             project_name="Team4",
-            # experiment_id
             experiment_name="training",
             output_file="model.csv",
             output_dir="./emissions/",
@@ -115,10 +78,10 @@ def train_lstm_model():
             measure_power_secs=5,
         )
         print("CodeCarbon correctly configured...")
-        EMISSIONS_TRACKER.start()
+        emission_tracker.start()
 
     # Set up MLflow tracking
-    if lstm_params["upload_experiment"] == True:
+    if lstm_params["upload_experiment"]:
         mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
         # Initialize DagsHub
         dagshub.init(
@@ -174,15 +137,15 @@ def train_lstm_model():
         x, y, test_size=test_size, random_state=random_state
     )
 
-    # save the split
+    # Save the split
     np.savez(PROCESSED_DATA_DIR / "train.npz", X=x_train, y=y_train)
     np.savez(PROCESSED_DATA_DIR / "test.npz", X=x_test, y=y_test)
 
     # Build the LSTM model
     inputs = Input(shape=(max_len,))
-    embedding_layer = Embedding(
-        input_dim=max_vocab_size, output_dim=embedding_dim, input_length=max_len
-    )(inputs)
+    embedding_layer = Embedding(input_dim=max_vocab_size, output_dim=embedding_dim)(
+        inputs
+    )
     lstm_layer = LSTM(lstm_units)(embedding_layer)
     norm_layer = BatchNormalization()(lstm_layer)
     dense_layer = Dense(32, activation="relu")(norm_layer)
@@ -195,7 +158,7 @@ def train_lstm_model():
     optimizer = Adam(learning_rate=learning_rate)
     model.compile(optimizer=optimizer, loss="binary_crossentropy", metrics=["accuracy"])
 
-    # Adjusted EarlyStopping callback
+    # EarlyStopping callback
     early_stopping = EarlyStopping(
         monitor="val_loss",
         min_delta=0.001,
@@ -205,7 +168,7 @@ def train_lstm_model():
     )
 
     # ModelCheckpoint callback
-    model_checkpoint_path = MODELS_DIR / f"{model_name}_final.keras"
+    model_checkpoint_path = MODELS_DIR / f"{model_name}_best.keras"
     model_checkpoint = ModelCheckpoint(
         model_checkpoint_path, save_best_only=True, monitor="val_loss", mode="min"
     )
@@ -222,7 +185,7 @@ def train_lstm_model():
 
     # Predict on test data
     y_pred_prob = model.predict(x_test)
-    y_pred = (y_pred_prob > 0.5).astype("int32")
+    y_pred = (y_pred_prob > 0.5).astype("int32").flatten()
 
     # Compute metrics
     accuracy = accuracy_score(y_test, y_pred)
@@ -230,7 +193,7 @@ def train_lstm_model():
     recall = recall_score(y_test, y_pred, zero_division=0)
     f1 = f1_score(y_test, y_pred, zero_division=0)
 
-    # Save metrics to a files
+    # Save metrics to a file
     metrics_path = metrics_dir / "lstm_metrics.txt"
     with open(metrics_path, "w", encoding="utf-8") as f:
         f.write(f"Accuracy: {accuracy}\n")
@@ -254,8 +217,6 @@ def train_lstm_model():
     plt.ylabel("Accuracy")
     plt.xlabel("Epoch")
     plt.legend()
-
-    # Save accuracy plot
     accuracy_plot_path = plots_dir / "lstm_accuracy.png"
     plt.savefig(accuracy_plot_path)
     plt.close()
@@ -267,8 +228,6 @@ def train_lstm_model():
     plt.ylabel("Loss")
     plt.xlabel("Epoch")
     plt.legend()
-
-    # Save loss plot
     loss_plot_path = plots_dir / "lstm_loss.png"
     plt.savefig(loss_plot_path)
     plt.close()
@@ -279,13 +238,11 @@ def train_lstm_model():
     plt.xlabel("Predicted")
     plt.ylabel("Actual")
     plt.title("LSTM Model Confusion Matrix")
-
-    # Save confusion matrix plot
     cm_plot_path = plots_dir / "lstm_confusion_matrix.png"
     plt.savefig(cm_plot_path)
     plt.close()
 
-    # Save classification report to a text file and log as artifact
+    # Save classification report to a text file
     report_path = reports_dir / "lstm_classification_report.txt"
     with open(report_path, "w", encoding="utf-8") as f:
         f.write("LSTM Model Classification Report:\n")
@@ -295,8 +252,75 @@ def train_lstm_model():
     final_model_path = MODELS_DIR / f"{model_name}_final.keras"
     model.save(final_model_path)
 
-    # Log metrics, artifacts and model to MLflow
-    if lstm_params["upload_experiment"] == True:
+    # Run Deepchecks model evaluation suite if enabled
+    if run_deepchecks:
+        print("Running Deepchecks model evaluation suite...")
+        # Convert x_train and x_test to DataFrames
+        x_train_df = pd.DataFrame(x_train)
+        x_test_df = pd.DataFrame(x_test)
+
+        # Specify that there are no categorical features
+        cat_features = []
+
+        # Create Deepchecks Datasets
+        train_dataset = Dataset(
+            x_train_df,
+            label=y_train,
+            cat_features=cat_features,
+            dataset_name="Train Dataset",
+        )
+        test_dataset = Dataset(
+            x_test_df,
+            label=y_test,
+            cat_features=cat_features,
+            dataset_name="Test Dataset",
+        )
+
+        # Set task type after initialization
+        train_dataset.task_type = "classification"
+        test_dataset.task_type = "classification"
+
+        class KerasClassifierWrapper:
+            """
+            Create a wrapper for the Keras model. It will contain
+            all information about the model
+            """
+
+            def __init__(self, model):
+                """
+                Store the model and labels (positive or negative sentiment)
+                """
+                self.model = model
+                self.classes_ = np.array([0, 1])
+
+            def predict(self, x):
+                proba = self.model.predict(x)
+                return (proba > 0.5).astype("int32").flatten()
+
+            def predict_proba(self, x):
+                proba = self.model.predict(x).flatten()
+                proba_stacked = np.vstack((1 - proba, proba)).T
+                return proba_stacked
+
+        wrapped_model = KerasClassifierWrapper(model)
+
+        # Run Deepchecks model evaluation suite
+        suite = model_evaluation()
+        suite_result = suite.run(
+            train_dataset=train_dataset, test_dataset=test_dataset, model=wrapped_model
+        )
+
+        # Save the suite result to an HTML file
+        deepchecks_report_path = reports_dir / "deepchecks_model_evaluation.html"
+        suite_result.save_as_html(str(deepchecks_report_path))
+        print(f"Deepchecks report saved at {deepchecks_report_path}")
+
+        # If using MLflow, log the Deepchecks report as an artifact
+        if lstm_params["upload_experiment"]:
+            mlflow.log_artifact(str(deepchecks_report_path), artifact_path="reports")
+
+    # Log metrics, artifacts, and model to MLflow
+    if lstm_params["upload_experiment"]:
         mlflow.log_param("vocab_size", vocab_size)
         mlflow.log_metrics(
             {
@@ -315,8 +339,9 @@ def train_lstm_model():
         # Log the model to MLflow
         mlflow.keras.log_model(model, artifact_path="model_LSTM")
 
+    # Stop CodeCarbon tracker if enabled
     if lstm_params["track_emissions"]:
-        EMISSIONS_TRACKER.stop()
+        emission_tracker.stop()
 
 
 if __name__ == "__main__":
