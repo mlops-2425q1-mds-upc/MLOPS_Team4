@@ -1,0 +1,14 @@
+version: 0.0
+os: linux
+files:
+ - source: .
+   destination: /home/ubuntu/MLOPS_Team4/
+hooks:
+  AfterInstall:
+   - location: /home/ubuntu/MLOPS_Team4/scripts/install_app_dependencies.sh
+     timeout: 300
+     runas: root
+  ApplicationStart:
+   - location: /home/ubuntu/MLOPS_Team4/scripts/start_server.sh
+     timeout: 300
+     runas: root
