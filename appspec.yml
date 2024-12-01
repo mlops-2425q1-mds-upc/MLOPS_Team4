@@ -2,7 +2,7 @@ version: 0.0
 os: linux
 files:
  - source: .
-   destination: /home/ubuntu/MLOPS_Team4/
+   destination: /home/ubuntu/MLOPS_Team4v2/
 hooks:
   AfterInstall:
    - location: /home/ubuntu/MLOPS_Team4/scripts/install_app_dependencies.sh
