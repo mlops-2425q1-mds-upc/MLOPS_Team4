@@ -1,0 +1,4 @@
+#!/bin/bash
+cd /home/ubuntu/MLOPS_Team4/
+source venv/bin/activate
+PYTHONPATH=./Sentiment_Analysis uvicorn api:app  --host 0.0.0.0 --port 5000

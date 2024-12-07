@@ -1,3 +1,4 @@
 #!/bin/bash
+cd /home/ubuntu/MLOPS_Team4/
 source venv/bin/activate
 sudo pip3 install -r requirements.txt

@@ -19,7 +19,7 @@ jobs:
         id: deploy
         run: |
           aws deploy create-deployment \
-            --application-name mlops_team4_app \
-            --deployment-group-name mlops_team4_deploy_grp \
+            --application-name app_codeDeploy_team4 \
+            --deployment-group-name grp_codeDeploy_team4 \
             --deployment-config-name CodeDeployDefault.OneAtATime \
             --github-location repository=${{ github.repository }},commitId=${{ github.sha }}
