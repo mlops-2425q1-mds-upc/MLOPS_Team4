@@ -4,11 +4,15 @@ files:
  - source: /
    destination: /home/ubuntu/MLOPS_Team4
 hooks:
+  BeforeBlockTraffic:
+   - location: scripts/stop_server
+     timeout: 300
+     runas: ubuntu
   AfterInstall:
    - location: scripts/install_app_dependencies
      timeout: 3600
      runas: ubuntu
-  ApplicationStart:
+  AfterAllowTraffic:
    - location: scripts/start_server
      timeout: 300
      runas: ubuntu
