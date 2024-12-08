@@ -13,13 +13,14 @@ pip install --upgrade pip
 pip install -r requirements.txt
 source ~/.bashrc
 # Check if required environment variables are set
-if [ -z "$DVC_USER" ] || [ -z "$DVC_TOKEN" ]; then
-    echo "Error: DVC_USER and DVC_TOKEN environment variables are not set."
-    exit 1
-fi
-
-dvc remote add origin https://dagshub.com/daniel.cantabella.cantabella/MLOPS_Team4.dvc
-dvc init
+#if [ -z "$DVC_USER" ] || [ -z "$DVC_TOKEN" ]; then
+#    echo "Error: DVC_USER and DVC_TOKEN environment variables are not set."
+#    exit 1
+#fi
+git init
+git remote add origin https://github.com/mlops-2425q1-mds-upc/MLOPS_Team4.git
+#dvc init
+sudo chown -R ubuntu:ubuntu /home/ubuntu/MLOPS_Team4/.dvc
 # Configure DVC remote with environment variables
 dvc remote modify origin --local auth basic
 dvc remote modify origin --local user "$DVC_USER"
