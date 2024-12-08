@@ -21,6 +21,7 @@ git init
 git remote add origin https://github.com/mlops-2425q1-mds-upc/MLOPS_Team4.git
 #dvc init
 sudo chown -R ubuntu:ubuntu /home/ubuntu/MLOPS_Team4/.dvc
+sudo chown -R ubuntu:ubuntu /home/ubuntu/MLOPS_Team4/data
 # Configure DVC remote with environment variables
 dvc remote modify origin --local auth basic
 dvc remote modify origin --local user "$DVC_USER"
