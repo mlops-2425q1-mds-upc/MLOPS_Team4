@@ -4,15 +4,25 @@ cd /home/ubuntu/MLOPS_Team4/
 sudo apt update
 sudo apt install -y python3 python3-venv python3-pip
 
-# Ensure correct ownership of the project directory
-sudo chown -R $USER:$USER /home/ubuntu/MLOPS_Team4
-
-# Create the virtual environment if it doesn't exist
 if [ ! -d "venv" ]; then
     python3 -m venv venv
 fi
-
 source venv/bin/activate
 
-pip install --upgrade pip  # Upgrade pip to avoid compatibility issues
+pip install --upgrade pip
 pip install -r requirements.txt
+
+# Check if required environment variables are set
+if [ -z "$DVC_USER" ] || [ -z "$DVC_TOKEN" ]; then
+    echo "Error: DVC_USER and DVC_TOKEN environment variables are not set."
+    exit 1
+fi
+
+dvc remote add origin https://dagshub.com/daniel.cantabella.cantabella/MLOPS_Team4.dvc
+# Configure DVC remote with environment variables
+dvc remote modify origin --local auth basic
+dvc remote modify origin --local user "$DVC_USER"
+dvc remote modify origin --local password "$DVC_TOKEN"
+
+# Pull data from DVC remote
+dvc pull
