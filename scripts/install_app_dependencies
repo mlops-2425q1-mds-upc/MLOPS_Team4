@@ -11,7 +11,7 @@ source venv/bin/activate
 
 pip install --upgrade pip
 pip install -r requirements.txt
-
+source ~/.bashrc
 # Check if required environment variables are set
 if [ -z "$DVC_USER" ] || [ -z "$DVC_TOKEN" ]; then
     echo "Error: DVC_USER and DVC_TOKEN environment variables are not set."
