@@ -1,13 +1,18 @@
 #!/bin/bash
 cd /home/ubuntu/MLOPS_Team4/
+
 sudo apt update
 sudo apt install -y python3 python3-venv python3-pip
+
+# Ensure correct ownership of the project directory
+sudo chown -R $USER:$USER /home/ubuntu/MLOPS_Team4
 
 # Create the virtual environment if it doesn't exist
 if [ ! -d "venv" ]; then
     python3 -m venv venv
 fi
+
 source venv/bin/activate
 
-
+pip install --upgrade pip  # Upgrade pip to avoid compatibility issues
 pip install -r requirements.txt
