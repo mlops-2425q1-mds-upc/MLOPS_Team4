@@ -13,7 +13,10 @@ from fastapi import status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from lstm_predict import predict_sentiment
+from prometheus_fastapi_instrumentator import Instrumentator
 from pydantic import BaseModel
+
+# Prometheus FastAPI Instrumentation
 
 try:
     from tensorflow.keras.models import load_model  # type: ignore
@@ -24,6 +27,9 @@ except ImportError as e:
 model = None
 MODEL_INFO = {}
 DATASET = {}
+
+# Initialize Prometheus instrumentator
+instrumentator = Instrumentator()
 
 
 class TextInput(BaseModel):
@@ -77,6 +83,9 @@ async def lifespan(app):
 
 # Initialize the FastAPI app with the lifespan
 app = FastAPI(lifespan=lifespan)
+
+# Initialize Prometheus instrumentation
+instrumentator.instrument(app).expose(app, endpoint="/metrics")
 
 
 @app.exception_handler(RequestValidationError)
