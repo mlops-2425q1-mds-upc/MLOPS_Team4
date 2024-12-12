@@ -15,13 +15,7 @@ COPY . .
 # Set up the virtual environment
 RUN python3 -m venv venv
 
-# Activate the virtual environment and install dependencies
-RUN . venv/bin/activate && \
-    pip install --upgrade pip && \
-    pip install -r requirements.txt
-
-# Ensure the required directories have the right permissions
-RUN sudo chown -R root:root /app/.dvc /app/data /app/models
+RUN pip install dvc==3.55.2
 
 # Initialize git and DVC, if necessary
 ARG DVC_USER
@@ -33,6 +27,14 @@ RUN git init && \
     dvc remote modify origin --local user "$DVC_USER" && \
     dvc remote modify origin --local password "$DVC_TOKEN" && \
     dvc pull
+
+# Activate the virtual environment and install dependencies
+RUN . venv/bin/activate && \
+    pip install --upgrade pip && \
+    pip install -r requirements.txt
+
+# Ensure the required directories have the right permissions
+RUN sudo chown -R root:root /app/.dvc /app/data /app/models
 
 # Expose the port that uvicorn will use
 EXPOSE 5000
