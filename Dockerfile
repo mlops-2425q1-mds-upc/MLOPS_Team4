@@ -40,4 +40,4 @@ RUN sudo chown -R root:root /app/.dvc /app/data /app/models
 EXPOSE 5000
 
 # Set the command to start the API with uvicorn
-CMD ["sh", "-c", "source venv/bin/activate && PYTHONPATH=./Sentiment_Analysis uvicorn api:app --host 0.0.0.0 --port 5000"]
+CMD ["bash", "-c", "source venv/bin/activate && PYTHONPATH=./Sentiment_Analysis uvicorn api:app --host 0.0.0.0 --port 5000"]
