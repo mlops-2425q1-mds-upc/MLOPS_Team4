@@ -24,8 +24,11 @@ RUN . venv/bin/activate && \
 RUN sudo chown -R root:root /app/.dvc /app/data /app/models
 
 # Initialize git and DVC, if necessary
+ARG DVC_USER
+ARG DVC_TOKEN
+
 RUN git init && \
-    git remote add origin https://github.com/mlops-2425q1-mds-upc/MLOPS_Team4.git && \
+    git remote get-url origin || git remote add origin https://github.com/mlops-2425q1-mds-upc/MLOPS_Team4.git && \
     dvc remote modify origin --local auth basic && \
     dvc remote modify origin --local user "$DVC_USER" && \
     dvc remote modify origin --local password "$DVC_TOKEN" && \
