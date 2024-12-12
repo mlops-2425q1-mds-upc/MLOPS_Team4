@@ -135,7 +135,7 @@ async def get_model_info():
     raise HTTPException(status_code=404, detail="Model information not available")
 
 
-# Endpoint 3: Extract random examples
+# Endpoint 3: Extract random example
 @app.get("/random_example")
 async def get_random_examples():
     """

@@ -1,0 +1,4 @@
+#!/bin/bash
+cd /home/ubuntu/MLOPS_Team4/
+source venv/bin/activate
+sudo systemctl stop myapi.service

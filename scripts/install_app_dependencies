@@ -1,0 +1,32 @@
+#!/bin/bash
+cd /home/ubuntu/MLOPS_Team4/
+
+sudo apt update
+sudo apt install -y python3 python3-venv python3-pip
+
+if [ ! -d "venv" ]; then
+    python3 -m venv venv
+fi
+source venv/bin/activate
+
+pip install --upgrade pip
+pip install -r requirements.txt
+source ~/.bashrc
+# Check if required environment variables are set
+#if [ -z "$DVC_USER" ] || [ -z "$DVC_TOKEN" ]; then
+#    echo "Error: DVC_USER and DVC_TOKEN environment variables are not set."
+#    exit 1
+#fi
+git init
+git remote add origin https://github.com/mlops-2425q1-mds-upc/MLOPS_Team4.git
+#dvc init
+sudo chown -R ubuntu:ubuntu /home/ubuntu/MLOPS_Team4/.dvc
+sudo chown -R ubuntu:ubuntu /home/ubuntu/MLOPS_Team4/data
+sudo chown -R ubuntu:ubuntu /home/ubuntu/MLOPS_Team4/models
+# Configure DVC remote with environment variables
+dvc remote modify origin --local auth basic
+dvc remote modify origin --local user "$DVC_USER"
+dvc remote modify origin --local password "$DVC_TOKEN"
+
+# Pull data from DVC remote
+dvc pull
